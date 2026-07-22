@@ -111,9 +111,9 @@ function brRenderOneMonth(elId, monthDate) {
     <div class="br-cal-head"><div class="br-cal-title">${BR_MONTH_FMT.format(monthDate)}</div></div>
     <div class="br-cal-grid">${cells}</div>
     <div class="br-cal-legend">
-      <span><span class="br-cal-legend-dot" style="background:#dcfce7;"></span>Disponible · Available</span>
-      <span><span class="br-cal-legend-dot" style="background:#fee2e2;"></span>Réservé · Booked</span>
-      <span><span class="br-cal-legend-dot" style="background:#059669;"></span>Votre sélection · Your selection</span>
+      <span><span class="br-cal-legend-dot" style="background:#dcfce7;"></span>Disponible · Available · 可預訂</span>
+      <span><span class="br-cal-legend-dot" style="background:#fee2e2;"></span>Réservé · Booked · 已預訂</span>
+      <span><span class="br-cal-legend-dot" style="background:#059669;"></span>Votre sélection · Your selection · 您的選擇</span>
     </div>`;
 }
 

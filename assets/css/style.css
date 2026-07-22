@@ -134,13 +134,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 /* ── Pricing ──────────────────────────────────────────────────── */
 .br-pricing-card {
   background: linear-gradient(135deg,#0f3d2e,#1a4a3a); border-radius: 14px;
-  padding: 1.5rem 1.75rem; color: #fff; display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;
+  padding: 1.5rem 1.75rem; color: #fff;
 }
-.br-pricing-main { flex: 1; min-width: 200px; }
-.br-price-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-.br-price-unit { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 600; }
-.br-price-note { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 0.5rem; }
-.br-pricing-facts { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.br-price-table { display: flex; flex-direction: column; gap: 0.1rem; margin-bottom: 0.9rem; }
+.br-price-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.br-price-row:last-of-type { border-bottom: none; }
+.br-price-row-label { font-size: 0.85rem; color: rgba(255,255,255,0.85); }
+.br-price-row-tag {
+  font-size: 0.62rem; font-weight: 700; color: #86efac; background: rgba(134,239,172,0.15);
+  border: 1px solid rgba(134,239,172,0.3); border-radius: 99px; padding: 0.1rem 0.45rem; margin-left: 0.4rem;
+}
+.br-price-row-value { font-size: 1rem; font-weight: 800; color: #fff; white-space: nowrap; }
+.br-price-row-total { padding-top: 0.75rem; margin-top: 0.35rem; border-top: 1.5px dashed rgba(255,255,255,0.25); }
+.br-price-row-total .br-price-row-label { font-weight: 700; color: #fff; }
+.br-price-row-total .br-price-row-value { font-size: 1.2rem; color: #86efac; }
+.br-price-note { font-size: 0.75rem; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 1rem; }
+.br-pricing-facts { display: flex; flex-wrap: wrap; gap: 1.5rem; padding-top: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); }
 .br-pricing-fact-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
 .br-pricing-fact-value { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.15rem; }
 

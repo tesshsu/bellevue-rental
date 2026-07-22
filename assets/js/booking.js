@@ -5,11 +5,29 @@
 */
 'use strict';
 
-// ── Editable settings — TODO: update these to your real values ────
-const BR_PRICE_PER_NIGHT = 75;   // €/night — TODO replace with your real rate
-const BR_MIN_NIGHTS      = 2;    // minimum stay in nights
-const BR_MAX_GUESTS      = 3;    // 1 adult, or 1 adult + 1 child (per the listing)
-const BR_FORMSPREE_URL   = 'https://formspree.io/f/xykrdgpa';
+// ── Editable settings ─────────────────────────────────────────────
+const BR_NIGHTLY_RATE = 85;              // €/night for stays under 1 week
+const BR_WEEK_RATES   = [470, 423, 381, 343]; // week 1, 2, 3, 4 (~10% off each extra week)
+                                          // week 5+ stays at the week-4 rate
+const BR_MIN_NIGHTS   = 1;               // minimum stay in nights
+const BR_MAX_GUESTS   = 3;               // 1 adult, or 1 adult + 1 child (per the listing)
+const BR_FORMSPREE_URL = 'https://formspree.io/f/xykrdgpa';
+
+// Tiered pricing: nightly rate under 1 week, then a discounted weekly rate
+// per full week (~10% cheaper each additional week, capped at week 4's
+// rate), plus any leftover days at the nightly rate.
+// Matches: 1 night=€85, 1 week=€470, 2 weeks=€893, 3 weeks=€1274, 4 weeks=€1617.
+function brComputeStayPrice(nights) {
+  if (nights <= 0) return 0;
+  const fullWeeks = Math.floor(nights / 7);
+  const extraDays = nights % 7;
+  let total = 0;
+  for (let w = 0; w < fullWeeks; w++) {
+    total += BR_WEEK_RATES[Math.min(w, BR_WEEK_RATES.length - 1)];
+  }
+  total += extraDays * BR_NIGHTLY_RATE;
+  return total;
+}
 
 // 1x1 transparent-ish grey placeholder shown until a real photo file exists
 const BR_PLACEHOLDER_IMG =
@@ -92,36 +110,36 @@ function brRecomputeSummary() {
 
   if (!startIso || !endIso) {
     summaryEl.classList.remove('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line">Choisissez vos dates d'arrivée et de départ ci-dessus · Pick your check-in and check-out dates above</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line">Choisissez vos dates d'arrivée et de départ ci-dessus · Pick your check-in and check-out dates above · 請先選擇上方的入住與退房日期</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (nights <= 0) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> La date de départ doit être après la date d'arrivée · Check-out must be after check-in</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> La date de départ doit être après la date d'arrivée · Check-out must be after check-in · 退房日期必須晚於入住日期</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (nights < BR_MIN_NIGHTS) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Séjour minimum : ${BR_MIN_NIGHTS} nuits · ${BR_MIN_NIGHTS}-night minimum stay</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Séjour minimum : ${BR_MIN_NIGHTS} nuit(s) · ${BR_MIN_NIGHTS}-night minimum stay · 最少需入住${BR_MIN_NIGHTS}晚</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (typeof brRangeHasConflict === 'function' && brRangeHasConflict(startIso, endIso)) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Une ou plusieurs de ces dates sont déjà réservées · One or more of these dates are already booked</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Une ou plusieurs de ces dates sont déjà réservées · One or more of these dates are already booked · 部分日期已被預訂</span>`;
     submitBtn.disabled = true;
     return;
   }
 
-  const total = nights * BR_PRICE_PER_NIGHT;
+  const total = brComputeStayPrice(nights);
   summaryEl.classList.remove('br-invalid');
   summaryEl.innerHTML = `
-    <span class="br-price-summary-line">${nights} nuit${nights > 1 ? 's' : ''} × €${BR_PRICE_PER_NIGHT} · ${nights} night${nights > 1 ? 's' : ''}</span>
+    <span class="br-price-summary-line">${nights} nuit${nights > 1 ? 's' : ''} · ${nights} night${nights > 1 ? 's' : ''} · ${nights}晚</span>
     <span class="br-price-summary-total">Total : €${total}</span>`;
   submitBtn.disabled = false;
 
@@ -188,15 +206,14 @@ async function brSubmitBooking(evt) {
 document.addEventListener('DOMContentLoaded', () => {
   brRenderGallery();
 
-  document.getElementById('br-price-display').textContent = '€' + BR_PRICE_PER_NIGHT;
   document.getElementById('br-min-nights-display').textContent = BR_MIN_NIGHTS;
   document.getElementById('br-max-guests-display').textContent = BR_MAX_GUESTS;
-  document.getElementById('br-quickfact-guests').textContent = '1-' + BR_MAX_GUESTS + ' pers.';
+  document.getElementById('br-quickfact-guests').textContent = '1-' + BR_MAX_GUESTS + ' pers. · 1-' + BR_MAX_GUESTS + '人';
 
   const guestSelect = document.getElementById('br-guests');
   if (guestSelect) {
     guestSelect.innerHTML = Array.from({ length: BR_MAX_GUESTS }, (_, i) => i + 1)
-      .map(n => `<option value="${n}">${n} personne${n > 1 ? 's' : ''}</option>`).join('');
+      .map(n => `<option value="${n}">${n} personne${n > 1 ? 's' : ''} · ${n} pers.</option>`).join('');
   }
 
   if (typeof brInitCalendar === 'function') brInitCalendar(brOnCalendarSelectionChange);
