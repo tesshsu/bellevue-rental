@@ -275,38 +275,58 @@ html { scroll-behavior: smooth; }
 .br-price-summary.br-invalid { background: #fef2f2; border-color: #fecaca; }
 .br-price-summary.br-invalid .br-price-summary-line,
 .br-price-summary.br-invalid .br-price-summary-total { color: #b91c1c; }
+.br-price-summary.br-empty { display: none; }
 
 .br-policy-card {
   background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #059669; border-radius: 10px;
-  padding: 1rem 1.15rem; margin-top: 0.25rem;
+  padding: 0.9rem 1.15rem; margin-top: 0.25rem;
 }
-.br-policy-title {
-  font-size: 0.78rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.65rem;
-}
-.br-policy-title i { color: #059669; }
-
-.br-policy-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0 0 0.5rem; padding: 0; list-style: none; }
-.br-policy-list li { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.78rem; color: #334155; line-height: 1.5; }
-.br-policy-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 0.45rem; flex-shrink: 0; }
+.br-policy-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .br-policy-dot-ok { background: #059669; }
 .br-policy-dot-warn { background: #d97706; }
 
-.br-policy-more { margin-bottom: 0.75rem; }
 .br-policy-more summary {
-  display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700;
-  color: #059669; cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-size: 0.78rem; color: #0f172a; cursor: pointer; list-style: none;
 }
 .br-policy-more summary::-webkit-details-marker { display: none; }
 .br-policy-more summary:focus-visible { outline: 2px solid #059669; outline-offset: 2px; border-radius: 4px; }
-.br-policy-more[open] summary { color: #065f46; }
-.br-policy-more-text { font-size: 0.75rem; color: #64748b; line-height: 1.6; margin: 0.5rem 0 0; padding-left: 1.2rem; }
+.br-policy-summary-text { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; min-width: 0; }
+.br-policy-summary-text strong { font-weight: 800; }
+.br-policy-toggle-label {
+  display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; font-weight: 700;
+  color: #059669; flex-shrink: 0; white-space: nowrap;
+}
+.br-policy-chevron { transition: transform 0.2s; font-size: 0.65rem; }
+.br-policy-more[open] .br-policy-chevron { transform: rotate(180deg); }
+.br-policy-more-text {
+  font-size: 0.75rem; color: #64748b; line-height: 1.6; margin: 0.65rem 0 0.75rem;
+  padding-top: 0.65rem; border-top: 1px solid #e2e8f0;
+}
 
 .br-policy-checkbox {
   display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.78rem; color: #0f172a; font-weight: 600;
-  cursor: pointer; padding-top: 0.6rem; border-top: 1px solid #e2e8f0;
+  cursor: pointer; padding-top: 0.65rem; margin-top: 0.65rem; border-top: 1px solid #e2e8f0;
 }
 .br-policy-checkbox input { margin-top: 0.2rem; width: 15px; height: 15px; accent-color: #059669; flex-shrink: 0; cursor: pointer; }
 .br-policy-checkbox input:focus-visible { outline: 2px solid #059669; outline-offset: 2px; }
+
+@keyframes br-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.br-policy-checkbox.br-shake { animation: br-shake 0.5s ease-in-out; }
+.br-policy-checkbox.br-shake input { outline: 2px solid #dc2626; outline-offset: 2px; border-radius: 4px; }
+
+.br-submit-btn.br-submit-btn--locked { background: #cbd5e1; cursor: not-allowed; }
+.br-submit-btn.br-submit-btn--locked:hover { background: #cbd5e1; transform: none; }
+
+.br-policy-hint {
+  display: none; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: #b91c1c; margin: 0;
+}
+.br-policy-hint.br-policy-hint-visible { display: flex; }
 
 .br-submit-btn {
   display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem;

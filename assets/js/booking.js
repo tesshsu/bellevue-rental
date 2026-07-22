@@ -165,6 +165,13 @@ function brUpdatePolicyBadge(startIso) {
   );
 }
 
+function brSetPolicyLock(locked) {
+  const submitBtn = document.getElementById('br-submit-btn');
+  const hint = document.getElementById('br-policy-hint');
+  submitBtn.classList.toggle('br-submit-btn--locked', locked);
+  hint?.classList.toggle('br-policy-hint-visible', locked);
+}
+
 function brRecomputeSummary() {
   const startIso = document.getElementById('br-checkin').value;
   const endIso   = document.getElementById('br-checkout').value;
@@ -176,16 +183,21 @@ function brRecomputeSummary() {
   brUpdatePolicyBadge(startIso);
 
   if (!startIso || !endIso) {
+    // No dates yet — the calendar hint above already guides the user, so
+    // stay out of the way instead of floating a redundant message here.
     summaryEl.classList.remove('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line">${brT_("Choisissez vos dates d'arrivée et de départ ci-dessus", 'Pick your check-in and check-out dates above', '請先選擇上方的入住與退房日期')}</span>`;
+    summaryEl.classList.add('br-empty');
     submitBtn.disabled = true;
+    brSetPolicyLock(false);
     return;
   }
+  summaryEl.classList.remove('br-empty');
 
   if (nights <= 0) {
     summaryEl.classList.add('br-invalid');
     summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_("La date de départ doit être après la date d'arrivée", 'Check-out must be after check-in', '退房日期必須晚於入住日期')}</span>`;
     submitBtn.disabled = true;
+    brSetPolicyLock(false);
     return;
   }
 
@@ -193,6 +205,7 @@ function brRecomputeSummary() {
     summaryEl.classList.add('br-invalid');
     summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_(`Séjour minimum : ${BR_MIN_NIGHTS} nuit(s)`, `${BR_MIN_NIGHTS}-night minimum stay`, `最少需入住${BR_MIN_NIGHTS}晚`)}</span>`;
     submitBtn.disabled = true;
+    brSetPolicyLock(false);
     return;
   }
 
@@ -200,6 +213,7 @@ function brRecomputeSummary() {
     summaryEl.classList.add('br-invalid');
     summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_('Une ou plusieurs de ces dates sont déjà réservées', 'One or more of these dates are already booked', '部分日期已被預訂')}</span>`;
     submitBtn.disabled = true;
+    brSetPolicyLock(false);
     return;
   }
 
@@ -209,7 +223,11 @@ function brRecomputeSummary() {
   summaryEl.innerHTML = `
     <span class="br-price-summary-line">${nightsLabel}</span>
     <span class="br-price-summary-total">${brT_('Total', 'Total', '總計')} : €${total}</span>`;
-  submitBtn.disabled = !policyAccepted;
+  // Dates are valid, so the button stays clickable — it only "soft locks"
+  // on the policy checkbox, with a hint and a shake on attempted submit
+  // (see brSubmitBooking), instead of a silently disabled button.
+  submitBtn.disabled = false;
+  brSetPolicyLock(!policyAccepted);
 
   document.getElementById('br-hidden-nights').value = nights;
   document.getElementById('br-hidden-total').value = total;
@@ -247,6 +265,17 @@ function brOnDateInputChange() {
   brRecomputeSummary();
 }
 
+function brNudgePolicyCheckbox() {
+  const checkbox = document.getElementById('br-policy-accept');
+  const wrap = checkbox?.closest('.br-policy-checkbox');
+  if (!checkbox || !wrap) return;
+  document.getElementById('br-policy-hint')?.classList.add('br-policy-hint-visible');
+  wrap.classList.remove('br-shake');
+  void wrap.offsetWidth; // restart the animation if it's already mid-shake
+  wrap.classList.add('br-shake');
+  checkbox.focus();
+}
+
 /* ── Form submission (AJAX to Formspree, no page reload) ─────────── */
 async function brSubmitBooking(evt) {
   evt.preventDefault();
@@ -256,6 +285,11 @@ async function brSubmitBooking(evt) {
   const errorEl = document.getElementById('br-form-error');
   successEl.style.display = 'none';
   errorEl.style.display = 'none';
+
+  if (!document.getElementById('br-policy-accept')?.checked) {
+    brNudgePolicyCheckbox();
+    return;
+  }
 
   btn.disabled = true;
   const originalLabel = btn.innerHTML;
