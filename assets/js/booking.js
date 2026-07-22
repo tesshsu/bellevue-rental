@@ -140,12 +140,40 @@ function brT_(fr, en, tw) {
   return typeof brT === 'function' ? brT(fr, en, tw) : fr;
 }
 
+const BR_CANCELLATION_FREE_DAYS = 5; // free cancellation up to this many days before check-in
+
+function brUpdatePolicyBadge(startIso) {
+  const el = document.getElementById('br-policy-badge-text');
+  if (!el) return;
+  if (!startIso) {
+    el.textContent = brT_(
+      `Annulation gratuite jusqu'à ${BR_CANCELLATION_FREE_DAYS} jours avant l'arrivée`,
+      `Free cancellation up to ${BR_CANCELLATION_FREE_DAYS} days before check-in`,
+      `入住前${BR_CANCELLATION_FREE_DAYS}天可免費取消`
+    );
+    return;
+  }
+  const deadline = new Date(startIso + 'T00:00:00');
+  deadline.setDate(deadline.getDate() - BR_CANCELLATION_FREE_DAYS);
+  const lang = typeof brCurrentLang === 'function' ? brCurrentLang() : 'fr';
+  const locale = lang === 'en' ? 'en-GB' : lang === 'tw' ? 'zh-TW' : 'fr-FR';
+  const dateStr = deadline.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+  el.textContent = brT_(
+    `Annulation gratuite jusqu'au ${dateStr}`,
+    `Free cancellation until ${dateStr}`,
+    `${dateStr} 前可免費取消`
+  );
+}
+
 function brRecomputeSummary() {
   const startIso = document.getElementById('br-checkin').value;
   const endIso   = document.getElementById('br-checkout').value;
   const summaryEl = document.getElementById('br-price-summary');
   const submitBtn = document.getElementById('br-submit-btn');
   const nights = brNightsBetween(startIso, endIso);
+  const policyAccepted = document.getElementById('br-policy-accept')?.checked ?? false;
+
+  brUpdatePolicyBadge(startIso);
 
   if (!startIso || !endIso) {
     summaryEl.classList.remove('br-invalid');
@@ -181,7 +209,7 @@ function brRecomputeSummary() {
   summaryEl.innerHTML = `
     <span class="br-price-summary-line">${nightsLabel}</span>
     <span class="br-price-summary-total">${brT_('Total', 'Total', '總計')} : €${total}</span>`;
-  submitBtn.disabled = false;
+  submitBtn.disabled = !policyAccepted;
 
   document.getElementById('br-hidden-nights').value = nights;
   document.getElementById('br-hidden-total').value = total;
@@ -289,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('br-checkin')?.addEventListener('change', brOnDateInputChange);
   document.getElementById('br-checkout')?.addEventListener('change', brOnDateInputChange);
+  document.getElementById('br-policy-accept')?.addEventListener('change', brRecomputeSummary);
   document.getElementById('br-booking-form')?.addEventListener('submit', brSubmitBooking);
 
   document.getElementById('br-lightbox-close')?.addEventListener('click', brCloseLightbox);

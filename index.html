@@ -330,6 +330,49 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
         <input type="hidden" name="_subject" value="Nouvelle demande de réservation — Studio Bellevue">
         <input type="text" name="_gotcha" style="display:none;">
 
+        <div class="br-form-full">
+          <div class="br-policy-card">
+            <div class="br-policy-title">
+              <i class="fas fa-calendar-day" aria-hidden="true"></i>
+              <span class="lang-fr">Conditions d'annulation</span><span class="lang-en">Cancellation terms</span><span class="lang-tw">取消政策</span>
+            </div>
+
+            <ul class="br-policy-list">
+              <li>
+                <span class="br-policy-dot br-policy-dot-ok" aria-hidden="true"></span>
+                <span id="br-policy-badge-text" aria-live="polite"></span>
+              </li>
+              <li>
+                <span class="br-policy-dot br-policy-dot-warn" aria-hidden="true"></span>
+                <span class="lang-fr">Moins de 48h avant l'arrivée : 1<sup>re</sup> nuit + 50 % des nuits restantes facturées.</span>
+                <span class="lang-en">Less than 48h before check-in: 1st night + 50% of remaining nights charged.</span>
+                <span class="lang-tw">入住前不到48小時：收取第一晚房費及其餘天數的50%。</span>
+              </li>
+            </ul>
+
+            <details class="br-policy-more">
+              <summary>
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span class="lang-fr">Voir le détail complet</span><span class="lang-en">See full policy</span><span class="lang-tw">查看完整政策</span>
+              </summary>
+              <p class="br-policy-more-text">
+                <span class="lang-fr">Annulation gratuite jusqu'à 5 jours avant la date d'arrivée. Si le voyageur annule moins de 48 heures avant l'arrivée, la première nuit ainsi que 50 % du montant total pour les nuits restantes sont non remboursables. En cas de non-présentation (no-show), la totalité du séjour est facturée.</span>
+                <span class="lang-en">Free cancellation up to 5 days before check-in. If the guest cancels less than 48 hours before check-in, the first night plus 50% of the total for the remaining nights are non-refundable. For no-shows, the total amount of the stay is charged.</span>
+                <span class="lang-tw">入住前5天以上取消可全額退款。若在入住前不到48小時取消，第一晚房費及其餘住宿天數總額的50%恕不退還。如未入住（no-show），將收取全額住宿費用。</span>
+              </p>
+            </details>
+
+            <label class="br-policy-checkbox">
+              <input type="checkbox" id="br-policy-accept" name="policy_accepted" required>
+              <span>
+                <span class="lang-fr">J'accepte le règlement intérieur et la politique d'annulation. *</span>
+                <span class="lang-en">I accept the house rules and the cancellation policy. *</span>
+                <span class="lang-tw">我同意房規與取消政策。*</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <div class="br-form-full" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <button type="submit" class="br-submit-btn" id="br-submit-btn" disabled>
             <i class="fas fa-paper-plane"></i>
