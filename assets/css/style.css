@@ -215,6 +215,30 @@ html { scroll-behavior: smooth; }
 .br-pricing-fact-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
 .br-pricing-fact-value { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.15rem; }
 
+/* ── Booking & payment terms ────────────────────────────────────── */
+.br-payment-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem 1.75rem;
+}
+.br-payment-steps { list-style: none; margin: 0 0 1.25rem; padding: 0; display: flex; flex-direction: column; gap: 1.1rem; }
+.br-payment-steps > li { display: flex; gap: 0.9rem; align-items: flex-start; }
+.br-payment-step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: #059669; color: #fff; font-weight: 800; font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.br-payment-step-title { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem; }
+.br-payment-step-desc { font-size: 0.82rem; color: #334155; line-height: 1.6; }
+.br-payment-methods { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.br-payment-methods li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #334155; }
+.br-payment-methods i { color: #059669; width: 1rem; text-align: center; }
+
+.br-payment-tax-note {
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #059669; border-radius: 12px;
+  padding: 1rem 1.25rem; display: flex; gap: 0.65rem; align-items: flex-start;
+}
+.br-payment-tax-note i { color: #059669; margin-top: 0.2rem; flex-shrink: 0; }
+.br-payment-tax-note strong { display: block; font-size: 0.82rem; color: #065f46; margin-bottom: 0.3rem; }
+.br-payment-tax-note p { font-size: 0.78rem; color: #334155; line-height: 1.6; margin: 0; }
+
 /* ── Calendar ─────────────────────────────────────────────────── */
 .br-cal-hint {
   text-align: center; font-size: 0.78rem; font-weight: 600; color: #059669;
