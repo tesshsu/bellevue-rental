@@ -11,65 +11,107 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 
+<!-- Set the display language before first paint, so the page never
+     flashes all three languages at once. -->
+<script>
+  (function () {
+    var saved = localStorage.getItem('br_lang');
+    document.documentElement.setAttribute('data-lang', saved || 'fr');
+  })();
+</script>
+
 <!-- Firebase (compat SDK) — powers the live availability calendar -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
+  <!-- ── LANGUAGE TOGGLE ──────────────────────────────────────── -->
+  <div class="br-lang-toggle" id="br-lang-toggle">
+    <button type="button" data-lang-btn="fr">FR</button>
+    <button type="button" data-lang-btn="en">EN</button>
+    <button type="button" data-lang-btn="tw">中</button>
+  </div>
+
   <!-- ── HERO ─────────────────────────────────────────────────── -->
-  <header class="br-hero">
+  <header class="br-hero" id="br-hero">
+    <div class="br-hero-carousel" id="br-hero-carousel"></div>
+    <div class="br-hero-overlay"></div>
+
     <div class="br-hero-inner">
-      <div class="br-hero-eyebrow"><i class="fas fa-leaf"></i> Location directe · Book direct, no fees · 直接預訂，無需仲介費</div>
+      <div class="br-hero-eyebrow">
+        <i class="fas fa-leaf"></i>
+        <span class="lang-fr">Location directe · Sans frais</span>
+        <span class="lang-en">Book direct · No fees</span>
+        <span class="lang-tw">直接預訂，無需仲介費</span>
+      </div>
       <h1>Studio Bellevue</h1>
       <div class="br-hero-loc">
         <i class="fas fa-map-marker-alt"></i>
-        Saint-Vallier-de-Thiey, Alpes-Maritimes — 10 min de Grasse, 35 min de Cannes · 距格拉斯10分鐘、坎城35分鐘車程
+        <span>Saint-Vallier-de-Thiey, Alpes-Maritimes</span>
         &nbsp;·&nbsp;
         <a href="https://www.google.com/maps/search/?api=1&query=13+All%C3%A9e+Bellevue+06460+Saint-Vallier-de-Thiey+France" target="_blank" rel="noopener">
-          Voir sur la carte <i class="fas fa-arrow-up-right-from-square" style="font-size:0.65rem;"></i>
+          <span class="lang-fr">Voir sur la carte</span><span class="lang-en">View on map</span><span class="lang-tw">在地圖上查看</span>
+          <i class="fas fa-arrow-up-right-from-square" style="font-size:0.65rem;"></i>
         </a>
+      </div>
+
+      <div class="br-geo-badges">
+        <span class="br-geo-badge">🚗 10 <span class="lang-fr">min de Grasse</span><span class="lang-en">min to Grasse</span><span class="lang-tw">分鐘至格拉斯</span></span>
+        <span class="br-geo-badge">🚗 35 <span class="lang-fr">min de Cannes</span><span class="lang-en">min to Cannes</span><span class="lang-tw">分鐘至坎城</span></span>
       </div>
 
       <div class="br-quickfacts">
         <div class="br-quickfact"><i class="fas fa-ruler-combined"></i><span>&lt; 35 m²</span></div>
-        <div class="br-quickfact"><i class="fas fa-user-friends"></i><span id="br-quickfact-guests">1-2 pers.</span></div>
-        <div class="br-quickfact"><i class="fas fa-key"></i><span>Arrivée autonome · 自助入住</span></div>
-        <div class="br-quickfact"><i class="fas fa-person-swimming"></i><span>Piscine partagée · 共用泳池</span></div>
-        <div class="br-quickfact"><i class="fas fa-square-parking"></i><span>Parking gratuit · 免費停車</span></div>
+        <div class="br-quickfact"><i class="fas fa-user-friends"></i><span id="br-quickfact-guests">1-3 pers.</span></div>
+        <div class="br-quickfact"><i class="fas fa-key"></i><span><span class="lang-fr">Arrivée autonome</span><span class="lang-en">Self check-in</span><span class="lang-tw">自助入住</span></span></div>
+        <div class="br-quickfact"><i class="fas fa-person-swimming"></i><span><span class="lang-fr">Piscine partagée</span><span class="lang-en">Shared pool</span><span class="lang-tw">共用泳池</span></span></div>
+        <div class="br-quickfact"><i class="fas fa-square-parking"></i><span><span class="lang-fr">Parking gratuit</span><span class="lang-en">Free parking</span><span class="lang-tw">免費停車</span></span></div>
         <div class="br-quickfact"><i class="fas fa-wifi"></i><span>Wifi</span></div>
       </div>
     </div>
+
+    <div class="br-hero-dots" id="br-hero-dots"></div>
   </header>
 
   <!-- ── GALLERY ──────────────────────────────────────────────── -->
   <section class="br-section">
-    <div class="br-section-title"><i class="fas fa-images"></i> Photos du studio · Studio photos · 套房照片</div>
-    <div class="br-section-sub">Vue d'ensemble par pièce · Room-by-room overview · 各空間一覽</div>
+    <div class="br-section-title">
+      <i class="fas fa-images"></i>
+      <span class="lang-fr">Photos du studio</span><span class="lang-en">Studio photos</span><span class="lang-tw">套房照片</span>
+    </div>
+    <div class="br-section-sub">
+      <span class="lang-fr">Vue d'ensemble par pièce</span><span class="lang-en">Room-by-room overview</span><span class="lang-tw">各空間一覽</span>
+    </div>
     <div id="br-gallery"></div>
   </section>
 
   <!-- ── DESCRIPTION ──────────────────────────────────────────── -->
   <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-house"></i> À propos du logement · About this stay · 關於此住宿</div>
-    <div class="br-desc">
-<strong>FR —</strong> Studio indépendant au rez-de-chaussée d'une villa dans les Alpes-Maritimes, à 10 min de Grasse et 35 min de Cannes. Accès libre au jardin de 2 100 m², à la terrasse, à la piscine partagée et au parking couvert.
+    <div class="br-section-title">
+      <i class="fas fa-house"></i>
+      <span class="lang-fr">À propos du logement</span><span class="lang-en">About this stay</span><span class="lang-tw">關於此住宿</span>
+    </div>
+    <div class="br-desc lang-fr">
+Studio indépendant au rez-de-chaussée d'une villa dans les Alpes-Maritimes, à 10 min de Grasse et 35 min de Cannes. Accès libre au jardin de 2 100 m², à la terrasse, à la piscine partagée et au parking couvert.
 
 Le studio (moins de 35 m²) comprend une chambre avec un coin bureau et un lit confortable (idéal pour un adulte, ou un adulte et un enfant), une kitchenette équipée d'un petit réfrigérateur et d'un micro-ondes (cuisine d'été — non adaptée à une cuisine intensive), ainsi qu'une salle de bain avec douche et toilettes.
 
 Vous profiterez d'une terrasse privée avec coin repas, d'un lavabo extérieur indépendant, d'un hamac et d'une vue sur les montagnes. Un chat vit discrètement sur la propriété.
 
 Cadre calme à Saint-Vallier-de-Thiey, proche des commerces et du marché local — idéal pour des vacances d'été tranquilles.
-
-<strong>EN —</strong> Independent ground-floor studio in a villa in the Alpes-Maritimes, 10 min from Grasse and 35 min from Cannes. Free access to the 2,100 m² garden, terrace, shared pool, and covered parking.
+    </div>
+    <div class="br-desc lang-en">
+Independent ground-floor studio in a villa in the Alpes-Maritimes, 10 min from Grasse and 35 min from Cannes. Free access to the 2,100 m² garden, terrace, shared pool, and covered parking.
 
 The studio (under 35 m²) includes a bedroom with a desk corner and a comfortable bed (ideal for one adult, or one adult and one child), a kitchenette with a small fridge and microwave (summer kitchen — not suited for heavy cooking), and a bathroom with shower and toilet.
 
 You'll also enjoy a private terrace with a dining area, an independent outdoor sink, a hammock, and mountain views. A cat lives discreetly on the property.
 
 Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market — perfect for a peaceful summer stay.
-
-<strong>TW —</strong> 獨立套房位於阿爾卑斯濱海省一棟別墅的一樓，距離格拉斯（Grasse）車程約10分鐘、坎城（Cannes）車程約35分鐘。可自由使用2,100平方公尺的花園、露台、共用泳池與有頂棚停車位。
+    </div>
+    <div class="br-desc lang-tw">
+獨立套房位於阿爾卑斯濱海省一棟別墅的一樓，距離格拉斯（Grasse）車程約10分鐘、坎城（Cannes）車程約35分鐘。可自由使用2,100平方公尺的花園、露台、共用泳池與有頂棚停車位。
 
 套房坪數在35平方公尺以下，包含一間附書桌角落與舒適床鋪的臥室（適合一位成人，或一位成人加一位兒童），一個配有小冰箱與微波爐的小廚房（夏日簡易廚房——不適合大量烹飪），以及一間附淋浴與馬桶的浴室。
 
@@ -81,48 +123,70 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
 
   <!-- ── AMENITIES ────────────────────────────────────────────── -->
   <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-list-check"></i> Équipements · Amenities · 設備</div>
+    <div class="br-section-title">
+      <i class="fas fa-list-check"></i>
+      <span class="lang-fr">Équipements</span><span class="lang-en">Amenities</span><span class="lang-tw">設備</span>
+    </div>
     <div class="br-amenities-grid">
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-utensils"></i></div><div><div class="br-amenity-title">Kitchenette</div><div class="br-amenity-desc">Petit réfrigérateur, micro-ondes · Small fridge, microwave · 小冰箱、微波爐</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-wifi"></i></div><div><div class="br-amenity-title">Wifi</div><div class="br-amenity-desc">Réseau · Network · 網路：13alleebellevue</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-square-parking"></i></div><div><div class="br-amenity-title">Parking gratuit couvert</div><div class="br-amenity-desc">Free covered parking on site · 免費有頂棚停車位</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-person-swimming"></i></div><div><div class="br-amenity-title">Piscine partagée</div><div class="br-amenity-desc">Juste en face du studio · Right across from the studio · 泳池就在套房正對面</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-tree"></i></div><div><div class="br-amenity-title">Jardin 2 100 m²</div><div class="br-amenity-desc">Grand jardin privé · Large private garden · 2,100平方公尺私人花園</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-chair"></i></div><div><div class="br-amenity-title">Terrasse & coin repas</div><div class="br-amenity-desc">Terrasse privée devant le studio · Private terrace · 私人露台用餐區</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-umbrella-beach"></i></div><div><div class="br-amenity-title">Hamac</div><div class="br-amenity-desc">Pour se détendre · For relaxing · 悠閒放鬆用吊床</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-shirt"></i></div><div><div class="br-amenity-title">Espace laverie</div><div class="br-amenity-desc">Laundry area on site · 洗衣區</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-mountain"></i></div><div><div class="br-amenity-title">Vue montagne</div><div class="br-amenity-desc">Mountain view · 山景</div></div></div>
-      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-key"></i></div><div><div class="br-amenity-title">Arrivée autonome</div><div class="br-amenity-desc">Boîte à clés sécurisée · Secure lockbox self check-in · 保險鑰匙盒自助入住</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-utensils"></i></div><div><div class="br-amenity-title">Kitchenette</div><div class="br-amenity-desc"><span class="lang-fr">Petit réfrigérateur, micro-ondes</span><span class="lang-en">Small fridge, microwave</span><span class="lang-tw">小冰箱、微波爐</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-wifi"></i></div><div><div class="br-amenity-title">Wifi</div><div class="br-amenity-desc"><span class="lang-fr">Réseau</span><span class="lang-en">Network</span><span class="lang-tw">網路</span> : 13alleebellevue</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-square-parking"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Parking gratuit couvert</span><span class="lang-en">Covered parking</span><span class="lang-tw">有頂棚停車位</span></div><div class="br-amenity-desc"><span class="lang-fr">Gratuit, sur place</span><span class="lang-en">Free, on site</span><span class="lang-tw">免費，就在現場</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-person-swimming"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Piscine partagée</span><span class="lang-en">Shared pool</span><span class="lang-tw">共用泳池</span></div><div class="br-amenity-desc"><span class="lang-fr">Juste en face du studio</span><span class="lang-en">Right across from the studio</span><span class="lang-tw">泳池就在套房正對面</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-tree"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Jardin 2 100 m²</span><span class="lang-en">2,100 m² garden</span><span class="lang-tw">2,100平方公尺花園</span></div><div class="br-amenity-desc"><span class="lang-fr">Grand jardin privé</span><span class="lang-en">Large private garden</span><span class="lang-tw">私人花園</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-chair"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Terrasse & coin repas</span><span class="lang-en">Terrace & dining area</span><span class="lang-tw">露台用餐區</span></div><div class="br-amenity-desc"><span class="lang-fr">Terrasse privée devant le studio</span><span class="lang-en">Private terrace</span><span class="lang-tw">私人露台</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-umbrella-beach"></i></div><div><div class="br-amenity-title">Hamac · Hammock · 吊床</div><div class="br-amenity-desc"><span class="lang-fr">Pour se détendre</span><span class="lang-en">For relaxing</span><span class="lang-tw">悠閒放鬆</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-shirt"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Espace laverie</span><span class="lang-en">Laundry area</span><span class="lang-tw">洗衣區</span></div><div class="br-amenity-desc"><span class="lang-fr">Sur place</span><span class="lang-en">On site</span><span class="lang-tw">現場設有</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-mountain"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Vue montagne</span><span class="lang-en">Mountain view</span><span class="lang-tw">山景</span></div><div class="br-amenity-desc"><span class="lang-fr">Depuis la terrasse</span><span class="lang-en">From the terrace</span><span class="lang-tw">從露台眺望</span></div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-key"></i></div><div><div class="br-amenity-title"><span class="lang-fr">Arrivée autonome</span><span class="lang-en">Self check-in</span><span class="lang-tw">自助入住</span></div><div class="br-amenity-desc"><span class="lang-fr">Boîte à clés sécurisée</span><span class="lang-en">Secure lockbox</span><span class="lang-tw">保險鑰匙盒</span></div></div></div>
     </div>
   </section>
 
   <!-- ── HOUSE RULES & CHECK-IN ──────────────────────────────── -->
   <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-scroll"></i> Règlement & arrivée · House rules & check-in · 房規與入住</div>
+    <div class="br-section-title">
+      <i class="fas fa-scroll"></i>
+      <span class="lang-fr">Règlement & arrivée</span><span class="lang-en">House rules & check-in</span><span class="lang-tw">房規與入住</span>
+    </div>
     <div class="br-rules-wrap">
 
       <div class="br-rule-card">
-        <div class="br-rule-card-title"><i class="fas fa-circle-info" style="color:#059669;"></i> Règlement intérieur · House rules · 房規</div>
+        <div class="br-rule-card-title">
+          <i class="fas fa-circle-info" style="color:#059669;"></i>
+          <span class="lang-fr">Règlement intérieur</span><span class="lang-en">House rules</span><span class="lang-tw">房規</span>
+        </div>
         <div class="br-rule-list">
-          <div class="br-rule-item"><i class="fas fa-droplet"></i> Évitez d'appliquer de grandes quantités de crème solaire avant la baignade (qualité de l'eau) · Avoid heavy sunscreen before swimming (pool water quality) · 下水前請避免大量塗抹防曬乳，以維護泳池水質</div>
-          <div class="br-rule-item"><i class="fas fa-toilet"></i> Ne rien jeter dans les toilettes, sauf le papier toilette · Nothing but toilet paper in the toilet · 馬桶內請勿丟棄衛生紙以外的物品</div>
-          <div class="br-rule-item"><i class="fas fa-moon"></i> Quartier résidentiel calme — merci d'éviter le bruit et les fêtes, notamment après 22h · Quiet residential area — please avoid noise after 10pm · 住宅區環境安靜，請避免喧嘩與派對，尤其晚上10點後</div>
-          <div class="br-rule-item"><i class="fas fa-fire-burner"></i> Kitchenette d'été — non adaptée à une cuisine intensive · Summer kitchenette, not suited for heavy cooking · 夏日簡易廚房，不適合大量烹飪</div>
-          <div class="br-rule-item"><i class="fas fa-cat"></i> Un chat vit discrètement sur la propriété · A cat lives discreetly on the property · 一隻貓咪偶爾會安靜地出現在這棟房產上</div>
+          <div class="br-rule-item"><i class="fas fa-droplet"></i> <span class="lang-fr">Évitez d'appliquer de grandes quantités de crème solaire avant la baignade (qualité de l'eau)</span><span class="lang-en">Avoid heavy sunscreen before swimming (pool water quality)</span><span class="lang-tw">下水前請避免大量塗抹防曬乳，以維護泳池水質</span></div>
+          <div class="br-rule-item"><i class="fas fa-toilet"></i> <span class="lang-fr">Ne rien jeter dans les toilettes, sauf le papier toilette</span><span class="lang-en">Nothing but toilet paper in the toilet</span><span class="lang-tw">馬桶內請勿丟棄衛生紙以外的物品</span></div>
+          <div class="br-rule-item"><i class="fas fa-moon"></i> <span class="lang-fr">Quartier résidentiel calme — merci d'éviter le bruit et les fêtes, notamment après 22h</span><span class="lang-en">Quiet residential area — please avoid noise after 10pm</span><span class="lang-tw">住宅區環境安靜，請避免喧嘩與派對，尤其晚上10點後</span></div>
+          <div class="br-rule-item"><i class="fas fa-fire-burner"></i> <span class="lang-fr">Kitchenette d'été — non adaptée à une cuisine intensive</span><span class="lang-en">Summer kitchenette, not suited for heavy cooking</span><span class="lang-tw">夏日簡易廚房，不適合大量烹飪</span></div>
+          <div class="br-rule-item"><i class="fas fa-cat"></i> <span class="lang-fr">Un chat vit discrètement sur la propriété</span><span class="lang-en">A cat lives discreetly on the property</span><span class="lang-tw">一隻貓咪偶爾會安靜地出現在這棟房產上</span></div>
         </div>
       </div>
 
       <div>
         <div class="br-checkin-box">
           <div class="br-checkin-times">
-            <div><div class="br-checkin-time-label">Arrivée · Check-in · 入住</div><div class="br-checkin-time-value">16:00</div></div>
-            <div><div class="br-checkin-time-label">Départ · Check-out · 退房</div><div class="br-checkin-time-value">11:00</div></div>
+            <div><div class="br-checkin-time-label"><span class="lang-fr">Arrivée</span><span class="lang-en">Check-in</span><span class="lang-tw">入住</span></div><div class="br-checkin-time-value">16:00</div></div>
+            <div><div class="br-checkin-time-label"><span class="lang-fr">Départ</span><span class="lang-en">Check-out</span><span class="lang-tw">退房</span></div><div class="br-checkin-time-value">11:00</div></div>
           </div>
-          <div class="br-checkin-note"><i class="fas fa-key"></i> Arrivée et départ en toute autonomie grâce à une boîte à clés sécurisée face au studio. Le code vous sera envoyé avant votre arrivée. · Self check-in/out via a secure lockbox in front of the studio — the code is sent before your arrival. · 透過套房正對面的保險鑰匙盒自助入住與退房，密碼將於入住前傳送給您。</div>
+          <div class="br-checkin-note">
+            <i class="fas fa-key"></i>
+            <span class="lang-fr">Arrivée et départ en toute autonomie grâce à une boîte à clés sécurisée face au studio. Le code vous sera envoyé avant votre arrivée.</span>
+            <span class="lang-en">Self check-in/out via a secure lockbox in front of the studio — the code is sent before your arrival.</span>
+            <span class="lang-tw">透過套房正對面的保險鑰匙盒自助入住與退房，密碼將於入住前傳送給您。</span>
+          </div>
         </div>
         <div class="br-rule-card">
-          <div class="br-rule-card-title"><i class="fas fa-route" style="color:#059669;"></i> Accès · Getting there · 交通方式</div>
-          <div class="br-rule-item" style="margin:0;"><i class="fas fa-car"></i> Domaine tranquille, accès facile en voiture, parking couvert sur place. ~10 min de Grasse, ~35 min de Cannes. · Quiet estate, easy car access, covered on-site parking. ~10 min from Grasse, ~35 min from Cannes. · 安靜的住宅區，開車即可輕鬆抵達，現場設有頂棚停車位。距格拉斯約10分鐘、坎城約35分鐘車程。</div>
+          <div class="br-rule-card-title">
+            <i class="fas fa-route" style="color:#059669;"></i>
+            <span class="lang-fr">Accès</span><span class="lang-en">Getting there</span><span class="lang-tw">交通方式</span>
+          </div>
+          <div class="br-rule-item" style="margin:0;">
+            <i class="fas fa-car"></i>
+            <span class="lang-fr">Domaine tranquille, accès facile en voiture, parking couvert sur place. ~10 min de Grasse, ~35 min de Cannes.</span>
+            <span class="lang-en">Quiet estate, easy car access, covered on-site parking. ~10 min from Grasse, ~35 min from Cannes.</span>
+            <span class="lang-tw">安靜的住宅區，開車即可輕鬆抵達，現場設有頂棚停車位。距格拉斯約10分鐘、坎城約35分鐘車程。</span>
+          </div>
         </div>
       </div>
 
@@ -131,35 +195,77 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
 
   <!-- ── PRICING ──────────────────────────────────────────────── -->
   <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-tag"></i> Tarifs · Pricing · 價格</div>
+    <div class="br-section-title">
+      <i class="fas fa-tag"></i>
+      <span class="lang-fr">Tarifs</span><span class="lang-en">Pricing</span><span class="lang-tw">價格</span>
+    </div>
+
+    <div class="br-new-badge">
+      <i class="fas fa-sparkles"></i>
+      <div>
+        <span class="lang-fr">Nouveau logement — profitez d'un accueil personnalisé et attentif dès votre première réservation.</span>
+        <span class="lang-en">New listing — enjoy a personal, attentive welcome from your very first booking.</span>
+        <span class="lang-tw">全新上線的住宿——從您的第一次入住起，就能享受親切用心的接待。</span>
+      </div>
+    </div>
+
+    <div class="br-direct-callout">
+      <i class="fas fa-hand-holding-dollar"></i>
+      <div>
+        <span class="lang-fr"><strong>Pourquoi réserver en direct ?</strong> Économisez les frais de service habituellement prélevés par Airbnb/Booking (souvent 10 à 20 %), et échangez directement avec moi pour organiser votre séjour.</span>
+        <span class="lang-en"><strong>Why book direct?</strong> Skip the service fees Airbnb/Booking typically add (often 10–20%), and communicate directly with your host to plan your stay.</span>
+        <span class="lang-tw"><strong>為什麼直接預訂？</strong>省下Airbnb/Booking通常收取的服務費（一般為10-20%），並直接與房東溝通安排您的行程。</span>
+      </div>
+    </div>
+
     <div class="br-pricing-card">
       <div class="br-price-table">
-        <div class="br-price-row"><span class="br-price-row-label">1 nuit · 1 night · 一晚</span><span class="br-price-row-value">€85</span></div>
-        <div class="br-price-row"><span class="br-price-row-label">1 semaine · 1 week · 一週</span><span class="br-price-row-value">€470</span></div>
-        <div class="br-price-row"><span class="br-price-row-label">2<sup>e</sup> semaine · Week 2 · 第二週<span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€423</span></div>
-        <div class="br-price-row"><span class="br-price-row-label">3<sup>e</sup> semaine · Week 3 · 第三週<span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€381</span></div>
-        <div class="br-price-row"><span class="br-price-row-label">4<sup>e</sup> semaine · Week 4 · 第四週<span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€343</span></div>
-        <div class="br-price-row br-price-row-total"><span class="br-price-row-label">≈ 1 mois · ≈ 1 month · 約一個月</span><span class="br-price-row-value">€1 617</span></div>
+        <div class="br-price-row"><span class="br-price-row-label">1 <span class="lang-fr">nuit</span><span class="lang-en">night</span><span class="lang-tw">晚</span></span><span class="br-price-row-value">€85</span></div>
+        <div class="br-price-row"><span class="br-price-row-label">1 <span class="lang-fr">semaine</span><span class="lang-en">week</span><span class="lang-tw">週</span></span><span class="br-price-row-value">€470</span></div>
+        <div class="br-price-row"><span class="br-price-row-label"><span class="lang-fr">2<sup>e</sup> semaine</span><span class="lang-en">Week 2</span><span class="lang-tw">第二週</span><span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€423</span></div>
+        <div class="br-price-row"><span class="br-price-row-label"><span class="lang-fr">3<sup>e</sup> semaine</span><span class="lang-en">Week 3</span><span class="lang-tw">第三週</span><span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€381</span></div>
+        <div class="br-price-row"><span class="br-price-row-label"><span class="lang-fr">4<sup>e</sup> semaine</span><span class="lang-en">Week 4</span><span class="lang-tw">第四週</span><span class="br-price-row-tag">-10%</span></span><span class="br-price-row-value">€343</span></div>
+        <div class="br-price-row br-price-row-total"><span class="br-price-row-label"><span class="lang-fr">≈ 1 mois</span><span class="lang-en">≈ 1 month</span><span class="lang-tw">約一個月</span></span><span class="br-price-row-value">€1 617</span></div>
       </div>
       <div class="br-price-note">
-        Séjours courts et longs bienvenus — écrivez-moi en message privé ou en commentaire, je réponds rapidement.<br>
-        Short and long stays both welcome — message me privately or leave a comment, I'll reply quickly.<br>
-        短租、長租都歡迎。想來的話，私訊我或留言，我會盡快回覆您的。
+        <span class="lang-fr">Séjours courts et longs bienvenus — écrivez-moi en message privé ou en commentaire, je réponds rapidement.</span>
+        <span class="lang-en">Short and long stays both welcome — message me privately or leave a comment, I'll reply quickly.</span>
+        <span class="lang-tw">短租、長租都歡迎。想來的話，私訊我或留言，我會盡快回覆您的。</span>
       </div>
       <div class="br-pricing-facts">
-        <div><div class="br-pricing-fact-label">Séjour minimum · Min. stay · 最短天數</div><div class="br-pricing-fact-value"><span id="br-min-nights-display">—</span> nuit(s) · night(s) · 晚</div></div>
-        <div><div class="br-pricing-fact-label">Capacité · Capacity · 容納人數</div><div class="br-pricing-fact-value"><span id="br-max-guests-display">—</span> pers. max · 人</div></div>
+        <div>
+          <div class="br-pricing-fact-label"><span class="lang-fr">Séjour minimum</span><span class="lang-en">Min. stay</span><span class="lang-tw">最短天數</span></div>
+          <div class="br-pricing-fact-value"><span id="br-min-nights-display">—</span> <span class="lang-fr">nuit(s)</span><span class="lang-en">night(s)</span><span class="lang-tw">晚</span></div>
+        </div>
+        <div>
+          <div class="br-pricing-fact-label"><span class="lang-fr">Capacité</span><span class="lang-en">Capacity</span><span class="lang-tw">容納人數</span></div>
+          <div class="br-pricing-fact-value"><span id="br-max-guests-display">—</span> <span class="lang-fr">pers. max</span><span class="lang-en">guests max</span><span class="lang-tw">人</span></div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ── AVAILABILITY CALENDAR ────────────────────────────────── -->
-  <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-calendar-days"></i> Disponibilités · Availability · 空房狀況</div>
-    <div class="br-section-sub">Cliquez une date d'arrivée puis une date de départ · Click a check-in date, then a check-out date · 請先點選入住日期，再點選退房日期</div>
+  <section class="br-section" style="padding-top:0;scroll-margin-top:1rem;" id="br-availability">
+    <div class="br-section-title">
+      <i class="fas fa-calendar-days"></i>
+      <span class="lang-fr">Disponibilités</span><span class="lang-en">Availability</span><span class="lang-tw">空房狀況</span>
+    </div>
+    <div class="br-section-sub">
+      <span class="lang-fr">Cliquez une date d'arrivée puis une date de départ</span>
+      <span class="lang-en">Click a check-in date, then a check-out date</span>
+      <span class="lang-tw">請先點選入住日期，再點選退房日期</span>
+    </div>
+
+    <div class="br-cal-hint" id="br-cal-hint">
+      <span class="lang-fr">👉 Cliquez une date pour commencer</span>
+      <span class="lang-en">👉 Click a date to start</span>
+      <span class="lang-tw">👉 請點選日期開始</span>
+    </div>
+
     <div class="br-cal-controls">
-      <button class="br-cal-controls-btn" id="br-cal-prev"><i class="fas fa-chevron-left"></i> Précédent</button>
-      <button class="br-cal-controls-btn" id="br-cal-next">Suivant <i class="fas fa-chevron-right"></i></button>
+      <button class="br-cal-controls-btn" id="br-cal-prev"><i class="fas fa-chevron-left"></i> <span class="lang-fr">Précédent</span><span class="lang-en">Previous</span><span class="lang-tw">上個月</span></button>
+      <button class="br-cal-controls-btn" id="br-cal-next"><span class="lang-fr">Suivant</span><span class="lang-en">Next</span><span class="lang-tw">下個月</span> <i class="fas fa-chevron-right"></i></button>
     </div>
     <div class="br-cal-wrap">
       <div class="br-cal" id="br-cal-1"></div>
@@ -168,42 +274,45 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
   </section>
 
   <!-- ── BOOKING FORM ─────────────────────────────────────────── -->
-  <section class="br-section" style="padding-top:0;">
-    <div class="br-section-title"><i class="fas fa-paper-plane"></i> Demande de réservation · Booking request · 預訂申請</div>
+  <section class="br-section" style="padding-top:0;scroll-margin-top:1rem;" id="br-booking-section">
+    <div class="br-section-title">
+      <i class="fas fa-paper-plane"></i>
+      <span class="lang-fr">Demande de réservation</span><span class="lang-en">Booking request</span><span class="lang-tw">預訂申請</span>
+    </div>
     <div class="br-section-sub">
       <i class="fas fa-shield-halved" style="color:#059669;margin-right:0.3rem;"></i>
-      Comment ça marche : 1) Envoyez votre demande — 2) Je vérifie la disponibilité et vous réponds par email sous 48h — 3) Confirmation du séjour.
-      · How it works: 1) Send your request — 2) I check availability and reply by email within 48h — 3) Stay confirmed.
-      · 流程說明：1) 送出申請 — 2) 我會確認空房狀況並於48小時內以電子郵件回覆您 — 3) 確認入住。
+      <span class="lang-fr">Comment ça marche : 1) Envoyez votre demande — 2) Je vérifie la disponibilité et vous réponds par email sous 48h — 3) Confirmation du séjour.</span>
+      <span class="lang-en">How it works: 1) Send your request — 2) I check availability and reply by email within 48h — 3) Stay confirmed.</span>
+      <span class="lang-tw">流程說明：1) 送出申請 — 2) 我會確認空房狀況並於48小時內以電子郵件回覆您 — 3) 確認入住。</span>
     </div>
 
     <div class="br-form-card">
       <form id="br-booking-form" action="https://formspree.io/f/xykrdgpa" method="POST" class="br-form-grid">
 
         <div>
-          <label class="br-label" for="br-name">Nom complet · Full name · 姓名 *</label>
+          <label class="br-label" for="br-name"><span class="lang-fr">Nom complet</span><span class="lang-en">Full name</span><span class="lang-tw">姓名</span> *</label>
           <input class="br-input" id="br-name" name="name" type="text" placeholder="Prénom Nom" required>
         </div>
         <div>
-          <label class="br-label" for="br-email">Email · 電子郵件 *</label>
+          <label class="br-label" for="br-email">Email · <span class="lang-tw">電子郵件</span> *</label>
           <input class="br-input" id="br-email" name="email" type="email" placeholder="vous@email.com" required>
         </div>
 
         <div>
-          <label class="br-label" for="br-phone">Téléphone · Phone · 電話 <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif · optional · 選填)</span></label>
+          <label class="br-label" for="br-phone"><span class="lang-fr">Téléphone</span><span class="lang-en">Phone</span><span class="lang-tw">電話</span> <span style="font-weight:400;text-transform:none;opacity:0.6;">(<span class="lang-fr">facultatif</span><span class="lang-en">optional</span><span class="lang-tw">選填</span>)</span></label>
           <input class="br-input" id="br-phone" name="phone" type="tel" placeholder="+33 6 12 34 56 78">
         </div>
         <div>
-          <label class="br-label" for="br-guests">Nombre de personnes · Guests · 人數 *</label>
+          <label class="br-label" for="br-guests"><span class="lang-fr">Nombre de personnes</span><span class="lang-en">Guests</span><span class="lang-tw">人數</span> *</label>
           <select class="br-input" id="br-guests" name="guests" required></select>
         </div>
 
         <div>
-          <label class="br-label" for="br-checkin">Arrivée · Check-in · 入住日期 *</label>
+          <label class="br-label" for="br-checkin"><span class="lang-fr">Arrivée</span><span class="lang-en">Check-in</span><span class="lang-tw">入住日期</span> *</label>
           <input class="br-input" id="br-checkin" name="checkin" type="date" required>
         </div>
         <div>
-          <label class="br-label" for="br-checkout">Départ · Check-out · 退房日期 *</label>
+          <label class="br-label" for="br-checkout"><span class="lang-fr">Départ</span><span class="lang-en">Check-out</span><span class="lang-tw">退房日期</span> *</label>
           <input class="br-input" id="br-checkout" name="checkout" type="date" required>
         </div>
 
@@ -212,7 +321,7 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
         </div>
 
         <div class="br-form-full">
-          <label class="br-label" for="br-message">Message · 留言 <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif · optional · 選填)</span></label>
+          <label class="br-label" for="br-message"><span class="lang-fr">Message</span><span class="lang-en">Message</span><span class="lang-tw">留言</span> <span style="font-weight:400;text-transform:none;opacity:0.6;">(<span class="lang-fr">facultatif</span><span class="lang-en">optional</span><span class="lang-tw">選填</span>)</span></label>
           <textarea class="br-textarea" id="br-message" name="message" placeholder="Dites-en un peu plus sur votre séjour… · Tell me a bit about your stay… · 想告訴我更多關於您這趟行程的事嗎？"></textarea>
         </div>
 
@@ -223,18 +332,33 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
 
         <div class="br-form-full" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <button type="submit" class="br-submit-btn" id="br-submit-btn" disabled>
-            <i class="fas fa-paper-plane"></i> Envoyer la demande · Send request · 送出申請
+            <i class="fas fa-paper-plane"></i>
+            <span class="lang-fr">Envoyer la demande</span><span class="lang-en">Send request</span><span class="lang-tw">送出申請</span>
           </button>
+          <span class="br-reassurance">
+            <i class="fas fa-circle-check"></i>
+            <span class="lang-fr">Demande sans engagement — aucun paiement requis maintenant.</span>
+            <span class="lang-en">No-commitment request — no payment required now.</span>
+            <span class="lang-tw">免費詢問，現在無需付款。</span>
+          </span>
         </div>
 
         <div class="br-form-full">
           <div class="br-form-success" id="br-form-success">
             <i class="fas fa-check-circle" style="font-size:1.1rem;"></i>
-            <span>Demande envoyée — merci ! Réponse par email sous 48h. · Request sent — thank you! Reply by email within 48h. · 申請已送出，謝謝！我將於48小時內以電子郵件回覆您。</span>
+            <span>
+              <span class="lang-fr">Demande envoyée — merci ! Réponse par email sous 48h.</span>
+              <span class="lang-en">Request sent — thank you! Reply by email within 48h.</span>
+              <span class="lang-tw">申請已送出，謝謝！我將於48小時內以電子郵件回覆您。</span>
+            </span>
           </div>
           <div class="br-form-error" id="br-form-error">
             <i class="fas fa-triangle-exclamation" style="font-size:1.1rem;"></i>
-            <span>Erreur d'envoi — réessayez, ou écrivez-moi directement par email. · Send error — please retry, or email me directly. · 送出時發生錯誤，請再試一次，或直接以電子郵件與我聯繫。</span>
+            <span>
+              <span class="lang-fr">Erreur d'envoi — réessayez, ou écrivez-moi directement par email.</span>
+              <span class="lang-en">Send error — please retry, or email me directly.</span>
+              <span class="lang-tw">送出時發生錯誤，請再試一次，或直接以電子郵件與我聯繫。</span>
+            </span>
           </div>
         </div>
       </form>
@@ -245,6 +369,20 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
   <footer class="br-footer">
     Studio Bellevue · 13 Allée Bellevue, 06460 Saint-Vallier-de-Thiey, France
   </footer>
+
+  <!-- ── STICKY BOOKING BAR ───────────────────────────────────── -->
+  <div class="br-sticky-bar" id="br-sticky-bar">
+    <div class="br-sticky-info">
+      <strong>Studio Bellevue</strong>
+      <span class="br-sticky-price">
+        <span class="lang-fr">dès €85/nuit</span><span class="lang-en">from €85/night</span><span class="lang-tw">每晚€85起</span>
+      </span>
+    </div>
+    <a href="#br-availability" class="br-sticky-cta">
+      <span class="lang-fr">Réserver</span><span class="lang-en">Book now</span><span class="lang-tw">立即預訂</span>
+      <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
 
   <!-- ── LIGHTBOX ─────────────────────────────────────────────── -->
   <div class="br-lightbox hidden" id="br-lightbox">
@@ -259,5 +397,6 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
   <script src="assets/js/photos-data.js"></script>
   <script src="assets/js/calendar.js"></script>
   <script src="assets/js/booking.js"></script>
+  <script src="assets/js/ui.js"></script>
 </body>
 </html>

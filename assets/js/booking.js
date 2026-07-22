@@ -38,35 +38,69 @@ const BR_PLACEHOLDER_IMG =
              text-anchor="middle" dominant-baseline="middle">Photo à venir</text>
      </svg>`);
 
-/* ── Gallery ───────────────────────────────────────────────────── */
+/* ── Gallery (bento preview + full lightbox) ──────────────────────
+   The preview shows one large feature tile (the first photo) plus up
+   to 4 more tiles, picked to cover distinct rooms where possible. The
+   "show all photos" button and the last tile's overlay both open the
+   lightbox at index 0, which can then browse every photo via prev/next.
+*/
 let _brFlatPhotos = [];
 let _brLightboxIndex = 0;
+
+function brBuildBentoPreview() {
+  if (_brFlatPhotos.length === 0) return [];
+  const featured = _brFlatPhotos[0];
+  const seenCats = new Set([featured.category]);
+  const preview = [featured];
+
+  for (const p of _brFlatPhotos) {
+    if (preview.length >= 5) break;
+    if (p !== featured && !seenCats.has(p.category)) {
+      preview.push(p);
+      seenCats.add(p.category);
+    }
+  }
+  for (const p of _brFlatPhotos) {
+    if (preview.length >= 5) break;
+    if (!preview.includes(p)) preview.push(p);
+  }
+  return preview;
+}
 
 function brRenderGallery() {
   const container = document.getElementById('br-gallery');
   if (!container || typeof STUDIO_PHOTOS === 'undefined') return;
 
-  const byCategory = {};
-  STUDIO_PHOTOS.forEach(p => {
-    (byCategory[p.category] = byCategory[p.category] || []).push(p);
-  });
   _brFlatPhotos = STUDIO_PHOTOS;
+  const preview = brBuildBentoPreview();
+  const total = _brFlatPhotos.length;
 
-  container.innerHTML = Object.entries(byCategory).map(([cat, photos]) => `
-    <div class="br-gallery-cat">
-      <div class="br-gallery-cat-title"><i class="fas fa-image"></i> ${cat}</div>
-      <div class="br-gallery-grid">
-        ${photos.map(p => {
-          const idx = _brFlatPhotos.indexOf(p);
-          return `
-          <div class="br-photo" onclick="brOpenLightbox(${idx})">
-            <img src="${p.file}" alt="${p.alt}" loading="lazy"
-                 onerror="this.onerror=null;this.src='${BR_PLACEHOLDER_IMG}';">
-            <div class="br-photo-caption">${p.alt}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`).join('');
+  const tiles = preview.map((p, i) => {
+    const idx = _brFlatPhotos.indexOf(p);
+    const isFeature = i === 0;
+    const isLast = i === preview.length - 1;
+    const moreCount = total - preview.length;
+    const overlay = (isLast && moreCount > 0)
+      ? `<div class="br-bento-more-overlay"><i class="fas fa-images"></i><span>+${moreCount}</span></div>`
+      : '';
+    return `
+      <div class="br-bento-tile${isFeature ? ' br-bento-feature' : ''}" onclick="brOpenLightbox(${idx})">
+        <img src="${p.file}" alt="${p.alt}" loading="lazy"
+             onerror="this.onerror=null;this.src='${BR_PLACEHOLDER_IMG}';">
+        ${overlay}
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="br-bento-grid">${tiles}</div>
+    <div style="text-align:center;">
+      <button type="button" class="br-show-all-btn" onclick="brOpenLightbox(0)">
+        <i class="fas fa-images"></i>
+        <span class="lang-fr">Afficher toutes les photos (${total})</span>
+        <span class="lang-en">Show all photos (${total})</span>
+        <span class="lang-tw">顯示所有照片（${total}）</span>
+      </button>
+    </div>`;
 }
 
 function brOpenLightbox(index) {
@@ -91,7 +125,7 @@ function brRenderLightbox() {
   img.src = p.file;
   img.onerror = () => { img.onerror = null; img.src = BR_PLACEHOLDER_IMG; };
   img.alt = p.alt;
-  document.getElementById('br-lightbox-caption').textContent = p.alt;
+  document.getElementById('br-lightbox-caption').textContent = p.category + ' — ' + p.alt;
 }
 
 /* ── Price summary / form validation ──────────────────────────── */
@@ -99,6 +133,11 @@ function brNightsBetween(startIso, endIso) {
   if (!startIso || !endIso) return 0;
   const ms = new Date(endIso + 'T00:00:00') - new Date(startIso + 'T00:00:00');
   return Math.round(ms / 86400000);
+}
+
+function brT_(fr, en, tw) {
+  // Falls back to French if ui.js hasn't loaded yet for some reason.
+  return typeof brT === 'function' ? brT(fr, en, tw) : fr;
 }
 
 function brRecomputeSummary() {
@@ -110,46 +149,60 @@ function brRecomputeSummary() {
 
   if (!startIso || !endIso) {
     summaryEl.classList.remove('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line">Choisissez vos dates d'arrivée et de départ ci-dessus · Pick your check-in and check-out dates above · 請先選擇上方的入住與退房日期</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line">${brT_("Choisissez vos dates d'arrivée et de départ ci-dessus", 'Pick your check-in and check-out dates above', '請先選擇上方的入住與退房日期')}</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (nights <= 0) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> La date de départ doit être après la date d'arrivée · Check-out must be after check-in · 退房日期必須晚於入住日期</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_("La date de départ doit être après la date d'arrivée", 'Check-out must be after check-in', '退房日期必須晚於入住日期')}</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (nights < BR_MIN_NIGHTS) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Séjour minimum : ${BR_MIN_NIGHTS} nuit(s) · ${BR_MIN_NIGHTS}-night minimum stay · 最少需入住${BR_MIN_NIGHTS}晚</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_(`Séjour minimum : ${BR_MIN_NIGHTS} nuit(s)`, `${BR_MIN_NIGHTS}-night minimum stay`, `最少需入住${BR_MIN_NIGHTS}晚`)}</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   if (typeof brRangeHasConflict === 'function' && brRangeHasConflict(startIso, endIso)) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> Une ou plusieurs de ces dates sont déjà réservées · One or more of these dates are already booked · 部分日期已被預訂</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_('Une ou plusieurs de ces dates sont déjà réservées', 'One or more of these dates are already booked', '部分日期已被預訂')}</span>`;
     submitBtn.disabled = true;
     return;
   }
 
   const total = brComputeStayPrice(nights);
   summaryEl.classList.remove('br-invalid');
+  const nightsLabel = brT_(`${nights} nuit${nights > 1 ? 's' : ''}`, `${nights} night${nights > 1 ? 's' : ''}`, `${nights} 晚`);
   summaryEl.innerHTML = `
-    <span class="br-price-summary-line">${nights} nuit${nights > 1 ? 's' : ''} · ${nights} night${nights > 1 ? 's' : ''} · ${nights}晚</span>
-    <span class="br-price-summary-total">Total : €${total}</span>`;
+    <span class="br-price-summary-line">${nightsLabel}</span>
+    <span class="br-price-summary-total">${brT_('Total', 'Total', '總計')} : €${total}</span>`;
   submitBtn.disabled = false;
 
   document.getElementById('br-hidden-nights').value = nights;
   document.getElementById('br-hidden-total').value = total;
 }
 
+function brUpdateCalHint(startIso, endIso) {
+  const hint = document.getElementById('br-cal-hint');
+  if (!hint) return;
+  if (!startIso) {
+    hint.innerHTML = `<span class="lang-fr">👉 Cliquez une date pour commencer</span><span class="lang-en">👉 Click a date to start</span><span class="lang-tw">👉 請點選日期開始</span>`;
+  } else if (!endIso) {
+    hint.innerHTML = `<span class="lang-fr">✅ Arrivée sélectionnée — choisissez maintenant votre date de départ</span><span class="lang-en">✅ Check-in set — now choose your check-out date</span><span class="lang-tw">✅ 已選擇入住日期，請選擇退房日期</span>`;
+  } else {
+    hint.innerHTML = `<span class="lang-fr">🎉 Séjour sélectionné — vérifiez le prix ci-dessous</span><span class="lang-en">🎉 Stay selected — check the price below</span><span class="lang-tw">🎉 已選擇入住區間，請至下方確認價格</span>`;
+  }
+}
+
 function brOnCalendarSelectionChange(startIso, endIso) {
   document.getElementById('br-checkin').value = startIso || '';
   document.getElementById('br-checkout').value = endIso || '';
+  brUpdateCalHint(startIso, endIso);
   brRecomputeSummary();
 }
 
@@ -162,6 +215,7 @@ function brOnDateInputChange() {
     checkoutEl.min = minCheckout.toISOString().slice(0, 10);
   }
   if (typeof brSetSelectionExternal === 'function') brSetSelectionExternal(checkinEl.value, checkoutEl.value);
+  brUpdateCalHint(checkinEl.value, checkoutEl.value);
   brRecomputeSummary();
 }
 
@@ -177,7 +231,7 @@ async function brSubmitBooking(evt) {
 
   btn.disabled = true;
   const originalLabel = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + brT_('Envoi…', 'Sending…', '傳送中…');
 
   try {
     const res = await fetch(form.action, {
@@ -202,19 +256,30 @@ async function brSubmitBooking(evt) {
   }
 }
 
+function brRebuildGuestSelect() {
+  const guestSelect = document.getElementById('br-guests');
+  if (!guestSelect) return;
+  const prevValue = guestSelect.value;
+  guestSelect.innerHTML = Array.from({ length: BR_MAX_GUESTS }, (_, i) => i + 1)
+    .map(n => `<option value="${n}">${n} ${brT_(n > 1 ? 'personnes' : 'personne', n > 1 ? 'guests' : 'guest', '人')}</option>`).join('');
+  if (prevValue) guestSelect.value = prevValue;
+}
+
 /* ── Init ──────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   brRenderGallery();
 
   document.getElementById('br-min-nights-display').textContent = BR_MIN_NIGHTS;
   document.getElementById('br-max-guests-display').textContent = BR_MAX_GUESTS;
-  document.getElementById('br-quickfact-guests').textContent = '1-' + BR_MAX_GUESTS + ' pers. · 1-' + BR_MAX_GUESTS + '人';
+  document.getElementById('br-quickfact-guests').innerHTML =
+    `<span class="lang-fr">1-${BR_MAX_GUESTS} pers.</span><span class="lang-en">1-${BR_MAX_GUESTS} guests</span><span class="lang-tw">1-${BR_MAX_GUESTS}人</span>`;
 
-  const guestSelect = document.getElementById('br-guests');
-  if (guestSelect) {
-    guestSelect.innerHTML = Array.from({ length: BR_MAX_GUESTS }, (_, i) => i + 1)
-      .map(n => `<option value="${n}">${n} personne${n > 1 ? 's' : ''} · ${n} pers.</option>`).join('');
-  }
+  brRebuildGuestSelect();
+  document.addEventListener('br:langchange', () => {
+    brRebuildGuestSelect();
+    brRecomputeSummary();
+    brUpdateCalHint(document.getElementById('br-checkin').value, document.getElementById('br-checkout').value);
+  });
 
   if (typeof brInitCalendar === 'function') brInitCalendar(brOnCalendarSelectionChange);
 
