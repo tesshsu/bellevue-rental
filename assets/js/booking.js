@@ -276,14 +276,44 @@ function brNudgePolicyCheckbox() {
   checkbox.focus();
 }
 
+function brEscapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function brShowSuccessScreen(guestName) {
+  const fields = document.getElementById('br-form-fields');
+  const screen = document.getElementById('br-success-screen');
+  const body = document.getElementById('br-success-body');
+  if (!fields || !screen || !body) return;
+
+  const name = brEscapeHtml((guestName || '').trim());
+  body.innerHTML = `
+    <span class="lang-fr">${name ? `Merci ${name} ! ` : 'Merci ! '}Votre demande de réservation pour le Studio Bellevue a bien été transmise. Nous vous répondrons par e-mail dans les plus brefs délais.</span>
+    <span class="lang-en">${name ? `Thank you, ${name}! ` : 'Thank you! '}Your booking request for Studio Bellevue has been successfully transmitted. We will reply to your email shortly.</span>
+    <span class="lang-tw">${name ? `感謝您，${name}！` : '感謝您！'}您的 Studio Bellevue 預訂申請已成功送出，我們將盡快以電子郵件回覆您。</span>`;
+
+  fields.hidden = true;
+  screen.hidden = false;
+  screen.classList.add('br-success-visible');
+}
+
+function brHideSuccessScreen() {
+  const fields = document.getElementById('br-form-fields');
+  const screen = document.getElementById('br-success-screen');
+  if (!fields || !screen) return;
+  screen.hidden = true;
+  screen.classList.remove('br-success-visible');
+  fields.hidden = false;
+}
+
 /* ── Form submission (AJAX to Formspree, no page reload) ─────────── */
 async function brSubmitBooking(evt) {
   evt.preventDefault();
   const form = evt.target;
   const btn = document.getElementById('br-submit-btn');
-  const successEl = document.getElementById('br-form-success');
   const errorEl = document.getElementById('br-form-error');
-  successEl.style.display = 'none';
   errorEl.style.display = 'none';
 
   if (!document.getElementById('br-policy-accept')?.checked) {
@@ -291,9 +321,11 @@ async function brSubmitBooking(evt) {
     return;
   }
 
+  const guestName = document.getElementById('br-name')?.value || '';
+
   btn.disabled = true;
   const originalLabel = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + brT_('Envoi…', 'Sending…', '傳送中…');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + brT_('Envoi en cours…', 'Sending…', '傳送中…');
 
   try {
     const res = await fetch(form.action, {
@@ -302,10 +334,10 @@ async function brSubmitBooking(evt) {
       headers: { 'Accept': 'application/json' }
     });
     if (res.ok) {
-      successEl.style.display = 'flex';
       form.reset();
       if (typeof brSetSelectionExternal === 'function') brSetSelectionExternal(null, null);
       brRecomputeSummary();
+      brShowSuccessScreen(guestName);
     } else {
       throw new Error('Formspree returned ' + res.status);
     }
@@ -353,6 +385,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('br-checkout')?.addEventListener('change', brOnDateInputChange);
   document.getElementById('br-policy-accept')?.addEventListener('change', brRecomputeSummary);
   document.getElementById('br-booking-form')?.addEventListener('submit', brSubmitBooking);
+  document.getElementById('br-success-home-btn')?.addEventListener('click', () => {
+    brHideSuccessScreen();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   document.getElementById('br-lightbox-close')?.addEventListener('click', brCloseLightbox);
   document.getElementById('br-lightbox-prev')?.addEventListener('click', () => brLightboxNav(-1));

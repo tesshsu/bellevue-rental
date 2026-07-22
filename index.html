@@ -287,7 +287,8 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
     </div>
 
     <div class="br-form-card">
-      <form id="br-booking-form" action="https://formspree.io/f/xykrdgpa" method="POST" class="br-form-grid">
+      <form id="br-booking-form" action="https://formspree.io/f/xykrdgpa" method="POST">
+       <div class="br-form-fields br-form-grid" id="br-form-fields">
 
         <div>
           <label class="br-label" for="br-name"><span class="lang-fr">Nom complet</span><span class="lang-en">Full name</span><span class="lang-tw">姓名</span> *</label>
@@ -385,14 +386,6 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
         </p>
 
         <div class="br-form-full">
-          <div class="br-form-success" id="br-form-success">
-            <i class="fas fa-check-circle" style="font-size:1.1rem;"></i>
-            <span>
-              <span class="lang-fr">Demande envoyée — merci ! Réponse par email sous 48h.</span>
-              <span class="lang-en">Request sent — thank you! Reply by email within 48h.</span>
-              <span class="lang-tw">申請已送出，謝謝！我將於48小時內以電子郵件回覆您。</span>
-            </span>
-          </div>
           <div class="br-form-error" id="br-form-error">
             <i class="fas fa-triangle-exclamation" style="font-size:1.1rem;"></i>
             <span>
@@ -402,6 +395,22 @@ Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market —
             </span>
           </div>
         </div>
+
+       </div>
+
+       <div class="br-success-screen" id="br-success-screen" hidden>
+         <div class="br-success-emoji" aria-hidden="true">🎉</div>
+         <h3 class="br-success-title">
+           <span class="lang-fr">Demande envoyée avec succès !</span>
+           <span class="lang-en">Request sent successfully!</span>
+           <span class="lang-tw">申請已成功送出！</span>
+         </h3>
+         <p class="br-success-body" id="br-success-body"></p>
+         <button type="button" class="br-success-home-btn" id="br-success-home-btn">
+           <i class="fas fa-arrow-up"></i>
+           <span class="lang-fr">Retour à l'accueil</span><span class="lang-en">Back to home</span><span class="lang-tw">回到首頁</span>
+         </button>
+       </div>
       </form>
     </div>
   </section>
