@@ -20,10 +20,11 @@ const STUDIO_PHOTOS = [
 
   { category: 'Chambre · Bedroom', file: 'assets/photos/chambre2.jpg', alt: 'Chambre avec lit confortable · Bedroom with comfortable bed' },
   { category: 'Chambre · Bedroom', file: 'assets/photos/chambre.jpg', alt: 'Coin bureau dans la chambre · Desk corner in the bedroom' },
-  { category: 'Chambre · Bedroom', file: 'assets/photos/chambre3.avif', alt: 'Chambre, vue côté salon · Bedroom, sofa-side view' },
+  { category: 'Chambre · Bedroom', file: 'assets/photos/chambre3.jpg', alt: 'Chambre, vue côté salon · Bedroom, sofa-side view' },
 
   { category: 'Kitchenette', file: 'assets/photos/cusine1.jpg', alt: 'Kitchenette équipée · Equipped kitchenette' },
   { category: 'Kitchenette', file: 'assets/photos/doorside.jpg', alt: 'Couloir et accès à la kitchenette · Hallway and kitchenette entrance' },
+  { category: 'Kitchenette', file: 'assets/photos/cuisine2.jpg', alt: 'Coin kitchenette avec évier et rangement · Kitchenette corner with sink and storage' },
 
   { category: 'Salle de bain · Bathroom', file: 'assets/photos/salonDeBain.avif', alt: 'Salle de bain avec lavabo · Bathroom with sink' },
   { category: 'Salle de bain · Bathroom', file: 'assets/photos/saleDeBain2.avif', alt: 'Salle de bain avec douche et toilettes · Bathroom with shower and toilet' },
