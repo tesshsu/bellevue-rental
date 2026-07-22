@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Studio Bellevue</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔑</text></svg>">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+
+<style>
+  .ad-wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .ad-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; }
+  .ad-card-title { font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .ad-form-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 0.75rem; align-items: end; }
+  @media (max-width: 700px) { .ad-form-grid { grid-template-columns: 1fr; } }
+  .ad-add-btn {
+    padding: 0.6rem 1.25rem; border-radius: 8px; border: none; background: #059669; color: #fff;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .ad-add-btn:hover { background: #047857; }
+  .ad-range-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;
+  }
+  .ad-range-row:last-child { border-bottom: none; }
+  .ad-range-dates { font-weight: 700; color: #0f172a; }
+  .ad-range-note { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .ad-del-btn {
+    background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px;
+    padding: 0.35rem 0.7rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  }
+  .ad-del-btn:hover { background: #fee2e2; }
+  .ad-empty { color: #94a3b8; font-size: 0.82rem; padding: 0.5rem 0; }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen">
+
+  <!-- ── AUTH OVERLAY ─────────────────────────────────────────── -->
+  <div id="auth-overlay" style="
+    position:fixed;inset:0;z-index:9999;background:rgba(10,40,25,0.97);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;">
+    <div style="text-align:center;max-width:340px;">
+      <div style="font-size:3rem;margin-bottom:0.75rem;">🏡</div>
+      <div style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.25rem;">Studio Bellevue</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-bottom:2rem;">Administration — Gestion des disponibilités</div>
+      <button id="signin-btn" onclick="adminSignIn()" style="
+        display:inline-flex;align-items:center;gap:0.6rem;
+        padding:0.75rem 1.75rem;border-radius:99px;border:none;cursor:pointer;
+        background:#fff;color:#1f2937;font-size:0.9rem;font-weight:700;
+        box-shadow:0 2px 12px rgba(0,0,0,0.4);">
+        <i class="fab fa-google" style="color:#ea4335;"></i>
+        Se connecter avec Google
+      </button>
+      <div id="signin-error" style="margin-top:1rem;font-size:0.72rem;color:#fca5a5;min-height:1rem;"></div>
+      <div style="margin-top:1.5rem;font-size:0.65rem;color:rgba(255,255,255,0.3);">
+        Accès réservé au propriétaire du logement.
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-wrap">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:1.5rem 0;">
+      <h1 style="font-size:1.3rem;font-weight:800;">🏡 Studio Bellevue — Admin</h1>
+      <div>
+        <span id="auth-badge" style="font-size:0.78rem;color:#64748b;margin-right:1rem;"></span>
+        <a href="index.html" style="font-size:0.78rem;color:#059669;text-decoration:none;margin-right:1rem;"><i class="fas fa-arrow-left"></i> Voir le site</a>
+        <button onclick="adminSignOut()" style="font-size:0.78rem;color:#b91c1c;background:none;border:none;cursor:pointer;">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-title"><i class="fas fa-plus-circle" style="color:#059669;"></i> Ajouter une réservation confirmée</div>
+      <div class="ad-form-grid">
+        <div>
+          <label class="br-label" for="ad-start">Arrivée · Check-in</label>
+          <input class="br-input" type="date" id="ad-start">
+        </div>
+        <div>
+          <label class="br-label" for="ad-end">Départ · Check-out</label>
+          <input class="br-input" type="date" id="ad-end">
+        </div>
+        <div>
+          <label class="br-label" for="ad-note">Note (nom, référence…)</label>
+          <input class="br-input" type="text" id="ad-note" placeholder="ex : Famille Martin">
+        </div>
+        <button class="ad-add-btn" onclick="adAddRange()"><i class="fas fa-plus"></i> Ajouter</button>
+      </div>
+      <div id="ad-error" style="color:#b91c1c;font-size:0.78rem;margin-top:0.75rem;"></div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-title"><i class="fas fa-calendar-check" style="color:#059669;"></i> Dates bloquées / réservées</div>
+      <div id="ad-range-list"><div class="ad-empty">Chargement…</div></div>
+    </div>
+
+    <div class="ad-card" style="background:#f0fdf4;border-color:#bbf7d0;">
+      <div class="ad-card-title" style="margin-bottom:0.5rem;"><i class="fas fa-circle-info" style="color:#059669;"></i> Comment ça marche</div>
+      <div style="font-size:0.8rem;color:#065f46;line-height:1.6;">
+        Quand vous confirmez un séjour par email après une demande, ajoutez-le ici. Le calendrier public sur la page d'accueil se met à jour instantanément pour tous les visiteurs. La date de départ est exclusive : pour un séjour du 10 au 14, entrez Arrivée = 10 et Départ = 14 (la nuit du 13 au 14 est la dernière occupée).
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  'use strict';
+
+  /* ── Auth gate ─────────────────────────────────────────────── */
+  if (brInitFirebase()) {
+    firebase.auth().onAuthStateChanged(user => {
+      const overlay = document.getElementById('auth-overlay');
+      const errorEl = document.getElementById('signin-error');
+      if (!user) { overlay.style.display = 'flex'; return; }
+      if (user.email === BR_ADMIN_EMAIL) {
+        overlay.style.display = 'none';
+        document.getElementById('auth-badge').textContent = user.email;
+        initRangeListener();
+      } else {
+        firebase.auth().signOut();
+        if (errorEl) errorEl.textContent = 'Accès refusé (' + user.email + ')';
+      }
+    });
+  } else {
+    document.getElementById('signin-error').textContent =
+      'Config Firebase manquante — voir assets/js/firebase-config.js (README).';
+    document.getElementById('signin-btn').disabled = true;
+  }
+
+  async function adminSignIn() {
+    const btn = document.getElementById('signin-btn');
+    btn.disabled = true;
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await firebase.auth().signInWithPopup(provider);
+    } catch (e) {
+      btn.disabled = false;
+      document.getElementById('signin-error').textContent = 'Échec : ' + e.message;
+    }
+  }
+
+  async function adminSignOut() { await firebase.auth().signOut(); }
+
+  /* ── Booked ranges: list + add + delete ───────────────────────── */
+  let _adRanges = {}; // { pushId: {start,end,note} }
+
+  function initRangeListener() {
+    firebase.database().ref('bookedRanges').on('value', snap => {
+      _adRanges = snap.val() || {};
+      renderRangeList();
+    });
+  }
+
+  function renderRangeList() {
+    const el = document.getElementById('ad-range-list');
+    const entries = Object.entries(_adRanges)
+      .sort((a, b) => (a[1].start || '').localeCompare(b[1].start || ''));
+    if (entries.length === 0) {
+      el.innerHTML = '<div class="ad-empty">Aucune date bloquée pour le moment.</div>';
+      return;
+    }
+    el.innerHTML = entries.map(([key, r]) => `
+      <div class="ad-range-row">
+        <div>
+          <div class="ad-range-dates">${r.start || '?'} → ${r.end || '?'}</div>
+          ${r.note ? `<div class="ad-range-note">${escAd(r.note)}</div>` : ''}
+        </div>
+        <button class="ad-del-btn" onclick="adDeleteRange('${key}')"><i class="fas fa-trash"></i> Supprimer</button>
+      </div>`).join('');
+  }
+
+  function escAd(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function adAddRange() {
+    const start = document.getElementById('ad-start').value;
+    const end = document.getElementById('ad-end').value;
+    const note = document.getElementById('ad-note').value.trim();
+    const errEl = document.getElementById('ad-error');
+    errEl.textContent = '';
+
+    if (!start || !end) { errEl.textContent = 'Renseignez une date d\'arrivée et de départ.'; return; }
+    if (end <= start) { errEl.textContent = 'La date de départ doit être après la date d\'arrivée.'; return; }
+
+    try {
+      await firebase.database().ref('bookedRanges').push({ start, end, note });
+      document.getElementById('ad-start').value = '';
+      document.getElementById('ad-end').value = '';
+      document.getElementById('ad-note').value = '';
+    } catch (e) {
+      errEl.textContent = 'Erreur : ' + e.message;
+    }
+  }
+
+  async function adDeleteRange(key) {
+    if (!confirm('Supprimer cette période bloquée ?')) return;
+    await firebase.database().ref('bookedRanges/' + key).remove();
+  }
+  </script>
+</body>
+</html>

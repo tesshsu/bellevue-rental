@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Bellevue · Saint-Vallier-de-Thiey — Location de vacances</title>
+<meta name="description" content="Studio indépendant avec piscine partagée et jardin, près de Grasse (Alpes-Maritimes). Réservez directement — sans intermédiaire.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏡</text></svg>">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+
+<!-- Firebase (compat SDK) — powers the live availability calendar -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <header class="br-hero">
+    <div class="br-hero-inner">
+      <div class="br-hero-eyebrow"><i class="fas fa-leaf"></i> Location directe · Book direct, no fees</div>
+      <h1>Studio Bellevue</h1>
+      <div class="br-hero-loc">
+        <i class="fas fa-map-marker-alt"></i>
+        Saint-Vallier-de-Thiey, Alpes-Maritimes — 10 min de Grasse, 35 min de Cannes
+        &nbsp;·&nbsp;
+        <a href="https://www.google.com/maps/search/?api=1&query=13+All%C3%A9e+Bellevue+06460+Saint-Vallier-de-Thiey+France" target="_blank" rel="noopener">
+          Voir sur la carte <i class="fas fa-arrow-up-right-from-square" style="font-size:0.65rem;"></i>
+        </a>
+      </div>
+
+      <div class="br-quickfacts">
+        <div class="br-quickfact"><i class="fas fa-ruler-combined"></i><span>&lt; 30 m²</span></div>
+        <div class="br-quickfact"><i class="fas fa-user-friends"></i><span id="br-quickfact-guests">1-2 pers.</span></div>
+        <div class="br-quickfact"><i class="fas fa-key"></i><span>Arrivée autonome</span></div>
+        <div class="br-quickfact"><i class="fas fa-person-swimming"></i><span>Piscine partagée</span></div>
+        <div class="br-quickfact"><i class="fas fa-square-parking"></i><span>Parking gratuit</span></div>
+        <div class="br-quickfact"><i class="fas fa-wifi"></i><span>Wifi</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── GALLERY ──────────────────────────────────────────────── -->
+  <section class="br-section">
+    <div class="br-section-title"><i class="fas fa-images"></i> Photos du studio · Studio photos</div>
+    <div class="br-section-sub">Vue d'ensemble par pièce · Room-by-room overview</div>
+    <div id="br-gallery"></div>
+  </section>
+
+  <!-- ── DESCRIPTION ──────────────────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-house"></i> À propos du logement · About this stay</div>
+    <div class="br-desc">
+<strong>FR —</strong> Studio indépendant au rez-de-chaussée d'une villa dans les Alpes-Maritimes, à 10 min de Grasse et 35 min de Cannes. Accès libre au jardin de 2 100 m², à la terrasse, à la piscine partagée et au parking couvert.
+
+Le studio (moins de 30 m²) comprend une chambre avec un coin bureau et un lit confortable (idéal pour un adulte, ou un adulte et un enfant), une kitchenette équipée d'un petit réfrigérateur et d'un micro-ondes (cuisine d'été — non adaptée à une cuisine intensive), ainsi qu'une salle de bain avec douche et toilettes.
+
+Vous profiterez d'une terrasse privée avec coin repas, d'un lavabo extérieur indépendant, d'un hamac et d'une vue sur les montagnes. Un chat vit discrètement sur la propriété.
+
+Cadre calme à Saint-Vallier-de-Thiey, proche des commerces et du marché local — idéal pour des vacances d'été tranquilles.
+
+<strong>EN —</strong> Independent ground-floor studio in a villa in the Alpes-Maritimes, 10 min from Grasse and 35 min from Cannes. Free access to the 2,100 m² garden, terrace, shared pool, and covered parking.
+
+The studio (under 30 m²) includes a bedroom with a desk corner and a comfortable bed (ideal for one adult, or one adult and one child), a kitchenette with a small fridge and microwave (summer kitchen — not suited for heavy cooking), and a bathroom with shower and toilet.
+
+You'll also enjoy a private terrace with a dining area, an independent outdoor sink, a hammock, and mountain views. A cat lives discreetly on the property.
+
+Quiet setting in Saint-Vallier-de-Thiey, close to shops and the local market — perfect for a peaceful summer stay.
+    </div>
+  </section>
+
+  <!-- ── AMENITIES ────────────────────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-list-check"></i> Équipements · Amenities</div>
+    <div class="br-amenities-grid">
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-utensils"></i></div><div><div class="br-amenity-title">Kitchenette</div><div class="br-amenity-desc">Petit réfrigérateur, micro-ondes · Small fridge, microwave</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-wifi"></i></div><div><div class="br-amenity-title">Wifi</div><div class="br-amenity-desc">Réseau · Network: 13alleebellevue</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-square-parking"></i></div><div><div class="br-amenity-title">Parking gratuit couvert</div><div class="br-amenity-desc">Free covered parking on site</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-person-swimming"></i></div><div><div class="br-amenity-title">Piscine partagée</div><div class="br-amenity-desc">Juste en face du studio · Right across from the studio</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-tree"></i></div><div><div class="br-amenity-title">Jardin 2 100 m²</div><div class="br-amenity-desc">Grand jardin privé · Large private garden</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-chair"></i></div><div><div class="br-amenity-title">Terrasse & coin repas</div><div class="br-amenity-desc">Terrasse privée devant le studio · Private terrace</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-umbrella-beach"></i></div><div><div class="br-amenity-title">Hamac</div><div class="br-amenity-desc">Pour se détendre · For relaxing</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-shirt"></i></div><div><div class="br-amenity-title">Espace laverie</div><div class="br-amenity-desc">Laundry area on site</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-mountain"></i></div><div><div class="br-amenity-title">Vue montagne</div><div class="br-amenity-desc">Mountain view</div></div></div>
+      <div class="br-amenity"><div class="br-amenity-icon"><i class="fas fa-key"></i></div><div><div class="br-amenity-title">Arrivée autonome</div><div class="br-amenity-desc">Boîte à clés sécurisée · Secure lockbox self check-in</div></div></div>
+    </div>
+  </section>
+
+  <!-- ── HOUSE RULES & CHECK-IN ──────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-scroll"></i> Règlement & arrivée · House rules & check-in</div>
+    <div class="br-rules-wrap">
+
+      <div class="br-rule-card">
+        <div class="br-rule-card-title"><i class="fas fa-circle-info" style="color:#059669;"></i> Règlement intérieur · House rules</div>
+        <div class="br-rule-list">
+          <div class="br-rule-item"><i class="fas fa-droplet"></i> Évitez d'appliquer de grandes quantités de crème solaire avant la baignade (qualité de l'eau) · Avoid heavy sunscreen before swimming (pool water quality)</div>
+          <div class="br-rule-item"><i class="fas fa-toilet"></i> Ne rien jeter dans les toilettes, sauf le papier toilette · Nothing but toilet paper in the toilet</div>
+          <div class="br-rule-item"><i class="fas fa-moon"></i> Quartier résidentiel calme — merci d'éviter le bruit et les fêtes, notamment après 22h · Quiet residential area — please avoid noise after 10pm</div>
+          <div class="br-rule-item"><i class="fas fa-fire-burner"></i> Kitchenette d'été — non adaptée à une cuisine intensive · Summer kitchenette, not suited for heavy cooking</div>
+          <div class="br-rule-item"><i class="fas fa-cat"></i> Un chat vit discrètement sur la propriété · A cat lives discreetly on the property</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="br-checkin-box">
+          <div class="br-checkin-times">
+            <div><div class="br-checkin-time-label">Arrivée · Check-in</div><div class="br-checkin-time-value">16:00</div></div>
+            <div><div class="br-checkin-time-label">Départ · Check-out</div><div class="br-checkin-time-value">11:00</div></div>
+          </div>
+          <div class="br-checkin-note"><i class="fas fa-key"></i> Arrivée et départ en toute autonomie grâce à une boîte à clés sécurisée face au studio. Le code vous sera envoyé avant votre arrivée. · Self check-in/out via a secure lockbox in front of the studio — the code is sent before your arrival.</div>
+        </div>
+        <div class="br-rule-card">
+          <div class="br-rule-card-title"><i class="fas fa-route" style="color:#059669;"></i> Accès · Getting there</div>
+          <div class="br-rule-item" style="margin:0;"><i class="fas fa-car"></i> Domaine tranquille, accès facile en voiture, parking couvert sur place. ~10 min de Grasse, ~35 min de Cannes. · Quiet estate, easy car access, covered on-site parking. ~10 min from Grasse, ~35 min from Cannes.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── PRICING ──────────────────────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-tag"></i> Tarifs · Pricing</div>
+    <div class="br-pricing-card">
+      <div class="br-pricing-main">
+        <span class="br-price-value" id="br-price-display">€—</span><span class="br-price-unit"> / nuit · / night</span>
+        <div class="br-price-note">Tarif indicatif — confirmé par email après votre demande · Indicative rate — confirmed by email after your inquiry</div>
+      </div>
+      <div class="br-pricing-facts">
+        <div><div class="br-pricing-fact-label">Séjour minimum · Min. stay</div><div class="br-pricing-fact-value"><span id="br-min-nights-display">—</span> nuits · nights</div></div>
+        <div><div class="br-pricing-fact-label">Capacité · Capacity</div><div class="br-pricing-fact-value"><span id="br-max-guests-display">—</span> pers. max</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AVAILABILITY CALENDAR ────────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-calendar-days"></i> Disponibilités · Availability</div>
+    <div class="br-section-sub">Cliquez une date d'arrivée puis une date de départ · Click a check-in date, then a check-out date</div>
+    <div class="br-cal-controls">
+      <button class="br-cal-controls-btn" id="br-cal-prev"><i class="fas fa-chevron-left"></i> Précédent</button>
+      <button class="br-cal-controls-btn" id="br-cal-next">Suivant <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="br-cal-wrap">
+      <div class="br-cal" id="br-cal-1"></div>
+      <div class="br-cal" id="br-cal-2"></div>
+    </div>
+  </section>
+
+  <!-- ── BOOKING FORM ─────────────────────────────────────────── -->
+  <section class="br-section" style="padding-top:0;">
+    <div class="br-section-title"><i class="fas fa-paper-plane"></i> Demande de réservation · Booking request</div>
+    <div class="br-section-sub">
+      <i class="fas fa-shield-halved" style="color:#059669;margin-right:0.3rem;"></i>
+      Comment ça marche : 1) Envoyez votre demande — 2) Je vérifie la disponibilité et vous réponds par email sous 48h — 3) Confirmation du séjour.
+      · How it works: 1) Send your request — 2) I check availability and reply by email within 48h — 3) Stay confirmed.
+    </div>
+
+    <div class="br-form-card">
+      <form id="br-booking-form" action="https://formspree.io/f/xykrdgpa" method="POST" class="br-form-grid">
+
+        <div>
+          <label class="br-label" for="br-name">Nom complet · Full name *</label>
+          <input class="br-input" id="br-name" name="name" type="text" placeholder="Prénom Nom" required>
+        </div>
+        <div>
+          <label class="br-label" for="br-email">Email *</label>
+          <input class="br-input" id="br-email" name="email" type="email" placeholder="vous@email.com" required>
+        </div>
+
+        <div>
+          <label class="br-label" for="br-phone">Téléphone · Phone <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif · optional)</span></label>
+          <input class="br-input" id="br-phone" name="phone" type="tel" placeholder="+33 6 12 34 56 78">
+        </div>
+        <div>
+          <label class="br-label" for="br-guests">Nombre de personnes · Guests *</label>
+          <select class="br-input" id="br-guests" name="guests" required></select>
+        </div>
+
+        <div>
+          <label class="br-label" for="br-checkin">Arrivée · Check-in *</label>
+          <input class="br-input" id="br-checkin" name="checkin" type="date" required>
+        </div>
+        <div>
+          <label class="br-label" for="br-checkout">Départ · Check-out *</label>
+          <input class="br-input" id="br-checkout" name="checkout" type="date" required>
+        </div>
+
+        <div class="br-form-full">
+          <div class="br-price-summary" id="br-price-summary"></div>
+        </div>
+
+        <div class="br-form-full">
+          <label class="br-label" for="br-message">Message <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif · optional)</span></label>
+          <textarea class="br-textarea" id="br-message" name="message" placeholder="Dites-en un peu plus sur votre séjour… · Tell me a bit about your stay…"></textarea>
+        </div>
+
+        <input type="hidden" name="nights" id="br-hidden-nights">
+        <input type="hidden" name="total_estimate_eur" id="br-hidden-total">
+        <input type="hidden" name="_subject" value="Nouvelle demande de réservation — Studio Bellevue">
+        <input type="text" name="_gotcha" style="display:none;">
+
+        <div class="br-form-full" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <button type="submit" class="br-submit-btn" id="br-submit-btn" disabled>
+            <i class="fas fa-paper-plane"></i> Envoyer la demande · Send request
+          </button>
+        </div>
+
+        <div class="br-form-full">
+          <div class="br-form-success" id="br-form-success">
+            <i class="fas fa-check-circle" style="font-size:1.1rem;"></i>
+            <span>Demande envoyée — merci ! Réponse par email sous 48h. · Request sent — thank you! Reply by email within 48h.</span>
+          </div>
+          <div class="br-form-error" id="br-form-error">
+            <i class="fas fa-triangle-exclamation" style="font-size:1.1rem;"></i>
+            <span>Erreur d'envoi — réessayez, ou écrivez-moi directement par email. · Send error — please retry, or email me directly.</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ───────────────────────────────────────────────── -->
+  <footer class="br-footer">
+    Studio Bellevue · 13 Allée Bellevue, 06460 Saint-Vallier-de-Thiey, France
+  </footer>
+
+  <!-- ── LIGHTBOX ─────────────────────────────────────────────── -->
+  <div class="br-lightbox hidden" id="br-lightbox">
+    <button class="br-lightbox-close" id="br-lightbox-close"><i class="fas fa-times"></i></button>
+    <button class="br-lightbox-prev" id="br-lightbox-prev"><i class="fas fa-chevron-left"></i></button>
+    <img id="br-lightbox-img" src="" alt="">
+    <button class="br-lightbox-next" id="br-lightbox-next"><i class="fas fa-chevron-right"></i></button>
+    <div class="br-lightbox-caption" id="br-lightbox-caption"></div>
+  </div>
+
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/photos-data.js"></script>
+  <script src="assets/js/calendar.js"></script>
+  <script src="assets/js/booking.js"></script>
+</body>
+</html>

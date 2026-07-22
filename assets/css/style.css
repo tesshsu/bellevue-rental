@@ -1,0 +1,231 @@
+/* ── Studio Bellevue booking page — shared styles ─────────────────
+   Naming convention: "br-" prefix (Bellevue Rental), mirrors the
+   ttf-tech.github.io convention of scoping custom CSS per project. */
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+.br-hero {
+  background: linear-gradient(160deg,#1a4a3a 0%,#0f3d2e 100%);
+  color: #fff; padding: 2rem 1.5rem 1.75rem;
+}
+.br-hero-inner { max-width: 1100px; margin: 0 auto; }
+.br-hero-eyebrow {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #86efac; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;
+}
+.br-hero h1 { font-size: 1.7rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.35rem; }
+.br-hero-loc { font-size: 0.85rem; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.br-hero-loc a { color: #86efac; text-decoration: none; }
+.br-hero-loc a:hover { text-decoration: underline; }
+
+.br-quickfacts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+.br-quickfact {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 0.65rem 0.75rem; text-align: center;
+}
+.br-quickfact i { font-size: 1.05rem; color: #86efac; display: block; margin-bottom: 0.3rem; }
+.br-quickfact span { font-size: 0.68rem; color: rgba(255,255,255,0.75); font-weight: 600; }
+
+/* ── Section shell ────────────────────────────────────────────── */
+.br-section { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+.br-section-title {
+  font-size: 1.05rem; font-weight: 800; color: #0f172a;
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;
+}
+.br-section-title i { color: #059669; }
+.br-section-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 1.25rem; }
+
+/* ── Gallery ──────────────────────────────────────────────────── */
+.br-gallery-cat { margin-bottom: 1.5rem; }
+.br-gallery-cat-title {
+  font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;
+}
+.br-gallery-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem;
+}
+.br-photo {
+  aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; cursor: pointer;
+  border: 1px solid #e2e8f0; background: #f1f5f9; position: relative;
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.br-photo:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-1px); }
+.br-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.br-photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.55));
+  color: #fff; font-size: 0.65rem; font-weight: 600; padding: 0.9rem 0.6rem 0.4rem;
+}
+
+/* Lightbox */
+.br-lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 2rem;
+}
+.br-lightbox.hidden { display: none; }
+.br-lightbox img { max-width: 100%; max-height: 85vh; border-radius: 8px; }
+.br-lightbox-close, .br-lightbox-prev, .br-lightbox-next {
+  position: absolute; background: rgba(255,255,255,0.12); border: none; color: #fff;
+  width: 42px; height: 42px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+}
+.br-lightbox-close:hover, .br-lightbox-prev:hover, .br-lightbox-next:hover { background: rgba(255,255,255,0.25); }
+.br-lightbox-close { top: 1.25rem; right: 1.25rem; }
+.br-lightbox-prev { left: 1.25rem; top: 50%; transform: translateY(-50%); }
+.br-lightbox-next { right: 1.25rem; top: 50%; transform: translateY(-50%); }
+.br-lightbox-caption {
+  position: absolute; bottom: 1.5rem; left: 0; right: 0; text-align: center;
+  color: rgba(255,255,255,0.8); font-size: 0.8rem;
+}
+
+/* ── Description ──────────────────────────────────────────────── */
+.br-desc { font-size: 0.85rem; color: #334155; line-height: 1.75; white-space: pre-line; }
+.br-desc strong { color: #0f172a; }
+
+/* ── Amenities ────────────────────────────────────────────────── */
+.br-amenities-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.7rem;
+}
+.br-amenity {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;
+}
+.br-amenity-icon {
+  width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+  background: #dcfce7; color: #059669; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.br-amenity-title { font-size: 0.82rem; font-weight: 700; color: #0f172a; }
+.br-amenity-desc { font-size: 0.72rem; color: #64748b; margin-top: 0.15rem; line-height: 1.4; }
+
+/* ── House rules & policies ───────────────────────────────────── */
+.br-rules-wrap {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.25rem;
+}
+@media (max-width: 780px) { .br-rules-wrap { grid-template-columns: 1fr; } }
+
+.br-rule-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.1rem 1.25rem;
+}
+.br-rule-card-title {
+  font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.br-rule-list { display: flex; flex-direction: column; gap: 0.55rem; }
+.br-rule-item {
+  display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.78rem; color: #334155; line-height: 1.5;
+}
+.br-rule-item i { color: #f59e0b; margin-top: 0.2rem; flex-shrink: 0; font-size: 0.85rem; }
+
+.br-checkin-box {
+  background: linear-gradient(135deg,#f0fdf4,#ecfdf5); border: 1px solid #bbf7d0; border-radius: 12px;
+  padding: 1.1rem 1.25rem; margin-bottom: 1.25rem;
+}
+.br-checkin-times { display: flex; gap: 1.5rem; margin-bottom: 0.75rem; }
+.br-checkin-time-label { font-size: 0.68rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; }
+.br-checkin-time-value { font-size: 1.15rem; font-weight: 800; color: #065f46; }
+.br-checkin-note { font-size: 0.75rem; color: #065f46; line-height: 1.55; display: flex; gap: 0.5rem; }
+.br-checkin-note i { margin-top: 0.15rem; flex-shrink: 0; }
+
+/* ── Pricing ──────────────────────────────────────────────────── */
+.br-pricing-card {
+  background: linear-gradient(135deg,#0f3d2e,#1a4a3a); border-radius: 14px;
+  padding: 1.5rem 1.75rem; color: #fff; display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;
+}
+.br-pricing-main { flex: 1; min-width: 200px; }
+.br-price-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+.br-price-unit { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 600; }
+.br-price-note { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 0.5rem; }
+.br-pricing-facts { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.br-pricing-fact-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
+.br-pricing-fact-value { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.15rem; }
+
+/* ── Calendar ─────────────────────────────────────────────────── */
+.br-cal-controls { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem; }
+.br-cal-controls-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 1rem;
+  border-radius: 99px; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.12s;
+}
+.br-cal-controls-btn:hover { background: #f1f5f9; }
+.br-cal-controls-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.br-cal-wrap {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.br-cal {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.1rem;
+}
+.br-cal-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;
+}
+.br-cal-title { font-size: 0.85rem; font-weight: 800; color: #0f172a; text-transform: capitalize; }
+.br-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.br-cal-dow { font-size: 0.6rem; font-weight: 700; color: #94a3b8; text-align: center; padding: 0.25rem 0; text-transform: uppercase; }
+.br-cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; border-radius: 6px; cursor: default; color: #94a3b8; position: relative;
+}
+.br-cal-day.br-empty { visibility: hidden; }
+.br-cal-day.br-avail { color: #0f172a; cursor: pointer; }
+.br-cal-day.br-avail:hover { background: #dcfce7; }
+.br-cal-day.br-booked { background: #fee2e2; color: #b91c1c; text-decoration: line-through; cursor: not-allowed; }
+.br-cal-day.br-past { color: #cbd5e1; cursor: not-allowed; }
+.br-cal-day.br-selected { background: #059669; color: #fff; font-weight: 700; }
+.br-cal-day.br-in-range { background: #a7f3d0; color: #065f46; }
+.br-cal-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.85rem; font-size: 0.65rem; color: #64748b; }
+.br-cal-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.br-cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* ── Booking form ─────────────────────────────────────────────── */
+.br-form-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.75rem 2rem;
+}
+.br-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.br-form-grid .br-form-full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .br-form-grid { grid-template-columns: 1fr; } .br-form-grid .br-form-full { grid-column: 1; } }
+
+.br-label {
+  display: block; font-size: 0.68rem; font-weight: 700; color: #475569;
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem;
+}
+.br-input, .br-textarea {
+  width: 100%; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #cbd5e1;
+  font-size: 0.85rem; color: #0f172a; outline: none; transition: border-color 0.15s; font-family: inherit;
+}
+.br-input:focus, .br-textarea:focus { border-color: #059669; }
+.br-textarea { resize: vertical; min-height: 80px; }
+
+.br-price-summary {
+  background: #f0fdf4; border: 1px dashed #86efac; border-radius: 10px;
+  padding: 0.9rem 1.1rem; margin-top: 0.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+}
+.br-price-summary-line { font-size: 0.78rem; color: #065f46; }
+.br-price-summary-total { font-size: 1.1rem; font-weight: 800; color: #065f46; }
+.br-price-summary.br-invalid { background: #fef2f2; border-color: #fecaca; }
+.br-price-summary.br-invalid .br-price-summary-line,
+.br-price-summary.br-invalid .br-price-summary-total { color: #b91c1c; }
+
+.br-submit-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem;
+  border-radius: 99px; background: #059669; color: #fff; font-size: 0.88rem; font-weight: 700;
+  border: none; cursor: pointer; transition: background 0.15s, transform 0.1s;
+}
+.br-submit-btn:hover { background: #047857; transform: translateY(-1px); }
+.br-submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+.br-form-success {
+  display: none; align-items: center; gap: 0.6rem; background: #dcfce7; border: 1px solid #86efac;
+  border-radius: 10px; padding: 0.85rem 1rem; margin-top: 1rem; color: #065f46; font-size: 0.82rem; font-weight: 600;
+}
+.br-form-error {
+  display: none; align-items: center; gap: 0.6rem; background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 10px; padding: 0.85rem 1rem; margin-top: 1rem; color: #b91c1c; font-size: 0.82rem; font-weight: 600;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.br-footer { text-align: center; padding: 1.5rem; font-size: 0.7rem; color: #94a3b8; }
+.br-footer a { color: #059669; text-decoration: none; }
