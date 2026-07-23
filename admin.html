@@ -78,6 +78,8 @@
 
   .ad-report-controls { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
   .ad-report-year-field select { width: auto; min-width: 7rem; }
+  #ad-report-months { width: auto; min-width: 10rem; padding: 0.35rem 0.5rem; }
+  .ad-badge-notcharged { background: #e2e8f0; color: #334155; }
   .ad-report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
   .ad-report-table th, .ad-report-table td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #f1f5f9; }
   .ad-report-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
@@ -145,12 +147,16 @@
           <label class="br-label" for="ad-report-year">Année</label>
           <select class="br-input" id="ad-report-year"></select>
         </div>
+        <div>
+          <label class="br-label" for="ad-report-months">Mois à exporter <span style="font-weight:400;text-transform:none;opacity:0.6;">(Ctrl/Cmd-clic pour plusieurs)</span></label>
+          <select class="br-input" id="ad-report-months" multiple size="6"></select>
+        </div>
         <button class="ad-add-btn" id="ad-export-btn" onclick="adExportYearReport()"><i class="fas fa-file-export"></i> Exporter (CSV)</button>
       </div>
       <div style="overflow-x:auto;">
         <table class="ad-report-table">
           <thead>
-            <tr><th>Mois</th><th>Réservations</th><th>Nuitées</th><th>Montant estimé (€)</th></tr>
+            <tr><th>Mois</th><th>Réservations</th><th>Nuitées</th><th>Montant estimé (€)</th><th>Taxe de séjour (€)</th></tr>
           </thead>
           <tbody id="ad-report-tbody"></tbody>
         </table>
@@ -178,6 +184,7 @@
           <select class="br-input" id="ad-status">
             <option value="pending">En attente</option>
             <option value="paid">Payé</option>
+            <option value="not_charged">Non chargé</option>
           </select>
         </div>
 
@@ -196,7 +203,11 @@
           <label class="br-label" for="ad-price">Montant total (€)</label>
           <input class="br-input" type="number" min="0" step="1" id="ad-price" placeholder="ex : 470">
         </div>
-        <div style="grid-column: span 2;">
+        <div>
+          <label class="br-label" for="ad-tax-amount">Taxe de séjour (€) <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif)</span></label>
+          <input class="br-input" type="number" min="0" step="0.01" id="ad-tax-amount" placeholder="ex : 10.49">
+        </div>
+        <div>
           <label class="br-label" for="ad-payment-method">Mode de paiement</label>
           <select class="br-input" id="ad-payment-method">
             <option value="">— Non précisé —</option>
@@ -205,6 +216,19 @@
             <option value="transfer">Virement</option>
             <option value="stripe">Carte bancaire (Stripe)</option>
           </select>
+        </div>
+
+        <div>
+          <label class="br-label" for="ad-adults">Nombre d'adultes <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif)</span></label>
+          <input class="br-input" type="number" min="0" step="1" id="ad-adults" placeholder="ex : 2">
+        </div>
+        <div>
+          <label class="br-label" for="ad-children">Nombre d'enfants <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif)</span></label>
+          <input class="br-input" type="number" min="0" step="1" id="ad-children" placeholder="ex : 1">
+        </div>
+        <div>
+          <label class="br-label" for="ad-reference">N° référence <span style="font-weight:400;text-transform:none;opacity:0.6;">(facultatif)</span></label>
+          <input class="br-input" type="text" id="ad-reference" placeholder="ex : 6814744251">
         </div>
 
         <div class="ad-full">
@@ -275,9 +299,11 @@
 
   /* ── Reservations: list + add/edit + delete ────────────────────
      Schema stored in Firebase under bookedRanges/<pushId>:
-     { start, end, note, clientName, clientContact,
-       paymentStatus: 'paid'|'pending', paymentMethod: ''|'cash'|'check'|'transfer'|'stripe',
-       price: number|null, nights: number }
+     { start, end, note, reference, clientName, clientContact,
+       paymentStatus: 'paid'|'pending'|'not_charged',
+       paymentMethod: ''|'cash'|'check'|'transfer'|'stripe',
+       price: number|null, taxAmount: number|null,
+       adults: number|null, children: number|null, nights: number }
      Older entries may only have {start,end,note} — rendering below
      falls back gracefully for any missing field.
   */
@@ -286,6 +312,11 @@
 
   const AD_PAYMENT_METHOD_LABEL = {
     cash: 'Espèces', check: 'Chèque', transfer: 'Virement', stripe: 'Carte (Stripe)'
+  };
+  const AD_STATUS_LABEL = {
+    paid: { label: 'Payé', cls: 'ad-badge-paid' },
+    pending: { label: 'En attente', cls: 'ad-badge-pending' },
+    not_charged: { label: 'Non chargé', cls: 'ad-badge-notcharged' }
   };
 
   function initRangeListener() {
@@ -321,14 +352,19 @@
     }
     el.innerHTML = entries.map(([key, r]) => {
       const nights = r.nights || adNightsBetween(r.start, r.end);
-      const isPaid = r.paymentStatus === 'paid';
-      const badge = `<span class="ad-badge ${isPaid ? 'ad-badge-paid' : 'ad-badge-pending'}">${isPaid ? 'Payé' : 'En attente'}</span>`;
+      const status = AD_STATUS_LABEL[r.paymentStatus] || AD_STATUS_LABEL.pending;
+      const badge = `<span class="ad-badge ${status.cls}">${status.label}</span>`;
       const clientLine = r.clientName || r.clientContact
         ? `<div><i class="fas fa-user"></i>${escAd(r.clientName || 'Client')}${r.clientContact ? ' (' + escAd(r.clientContact) + ')' : ''}</div>`
         : '';
       const priceLine = (r.price || r.paymentMethod)
         ? `<div><i class="fas fa-euro-sign"></i>${r.price ? escAd(String(r.price)) + ' €' : 'Montant non précisé'}${r.paymentMethod ? ' · ' + (AD_PAYMENT_METHOD_LABEL[r.paymentMethod] || r.paymentMethod) : ''}</div>`
         : '';
+      const taxLine = r.taxAmount ? `<div><i class="fas fa-receipt"></i>Taxe de séjour : ${escAd(String(r.taxAmount))} €</div>` : '';
+      const guestsLine = (r.adults || r.children)
+        ? `<div><i class="fas fa-people-group"></i>${r.adults ? r.adults + ' adulte' + (r.adults > 1 ? 's' : '') : ''}${r.adults && r.children ? ', ' : ''}${r.children ? r.children + ' enfant' + (r.children > 1 ? 's' : '') : ''}</div>`
+        : '';
+      const referenceLine = r.reference ? `<div><i class="fas fa-hashtag"></i>Réf. ${escAd(r.reference)}</div>` : '';
       const notesLine = r.note ? `<div class="ad-res-notes"><i class="fas fa-message"></i> ${escAd(r.note)}</div>` : '';
       return `
       <div class="ad-res-card">
@@ -336,7 +372,7 @@
           <div><span class="ad-res-dates">🗓️ ${r.start || '?'} → ${r.end || '?'}</span><span class="ad-res-nights">${nights > 0 ? nights + ' nuit' + (nights > 1 ? 's' : '') : ''}</span></div>
           ${badge}
         </div>
-        <div class="ad-res-meta">${clientLine}${priceLine}</div>
+        <div class="ad-res-meta">${clientLine}${priceLine}${taxLine}${guestsLine}${referenceLine}</div>
         ${notesLine}
         <div class="ad-res-actions">
           <button class="ad-edit-btn" onclick="adEditRange('${key}')"><i class="fas fa-pen"></i> Modifier</button>
@@ -360,19 +396,21 @@
   const AD_MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
   function adMonthlyBuckets() {
-    const buckets = {}; // 'YYYY-MM' -> { nights, revenue, keys:Set }
+    const buckets = {}; // 'YYYY-MM' -> { nights, revenue, tax, keys:Set }
     Object.entries(_adRanges).forEach(([key, r]) => {
       if (!r.start || !r.end) return;
       const nights = adNightsBetween(r.start, r.end);
       if (nights <= 0) return;
       const perNight = r.price ? r.price / nights : 0;
+      const perNightTax = r.taxAmount ? r.taxAmount / nights : 0;
       const cur = new Date(r.start + 'T00:00:00');
       const end = new Date(r.end + 'T00:00:00');
       while (cur < end) {
         const ym = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0');
-        if (!buckets[ym]) buckets[ym] = { nights: 0, revenue: 0, keys: new Set() };
+        if (!buckets[ym]) buckets[ym] = { nights: 0, revenue: 0, tax: 0, keys: new Set() };
         buckets[ym].nights += 1;
         buckets[ym].revenue += perNight;
+        buckets[ym].tax += perNightTax;
         buckets[ym].keys.add(key);
         cur.setDate(cur.getDate() + 1);
       }
@@ -390,6 +428,7 @@
     document.getElementById('ad-stat-revenue').textContent = totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €';
 
     adPopulateReportYears();
+    adPopulateReportMonths();
     adRenderYearReport();
   }
 
@@ -404,42 +443,60 @@
     select.value = sorted.includes(prevValue) ? prevValue : sorted[0];
   }
 
+  function adPopulateReportMonths() {
+    const select = document.getElementById('ad-report-months');
+    if (select.options.length) return; // populate once — all months, all selected by default
+    select.innerHTML = AD_MONTH_NAMES.map((name, i) => `<option value="${i}" selected>${name}</option>`).join('');
+  }
+
+  function adGetSelectedMonths() {
+    const selected = Array.from(document.getElementById('ad-report-months').selectedOptions).map(o => Number(o.value));
+    return selected.length ? selected : AD_MONTH_NAMES.map((_, i) => i); // none selected = export all
+  }
+
   function adBuildYearReportRows(year) {
     const buckets = adMonthlyBuckets();
     const rows = AD_MONTH_NAMES.map((name, i) => {
       const ym = year + '-' + String(i + 1).padStart(2, '0');
       const b = buckets[ym];
-      return { month: name, count: b ? b.keys.size : 0, nights: b ? b.nights : 0, revenue: b ? b.revenue : 0 };
+      return { month: name, count: b ? b.keys.size : 0, nights: b ? b.nights : 0, revenue: b ? b.revenue : 0, tax: b ? b.tax : 0 };
     });
-    const totals = rows.reduce((acc, row) => ({
-      count: acc.count + row.count, nights: acc.nights + row.nights, revenue: acc.revenue + row.revenue
-    }), { count: 0, nights: 0, revenue: 0 });
-    return { rows, totals };
+    return rows;
+  }
+
+  function adSumRows(rows) {
+    return rows.reduce((acc, row) => ({
+      count: acc.count + row.count, nights: acc.nights + row.nights, revenue: acc.revenue + row.revenue, tax: acc.tax + row.tax
+    }), { count: 0, nights: 0, revenue: 0, tax: 0 });
   }
 
   function adRenderYearReport() {
     const year = document.getElementById('ad-report-year').value;
-    const { rows, totals } = adBuildYearReportRows(year);
+    const rows = adBuildYearReportRows(year);
+    const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
     document.getElementById('ad-report-tbody').innerHTML = rows.map(row => `
-      <tr><td>${row.month}</td><td>${row.count}</td><td>${row.nights}</td><td>${fmt(row.revenue)} €</td></tr>
+      <tr><td>${row.month}</td><td>${row.count}</td><td>${row.nights}</td><td>${fmt(row.revenue)} €</td><td>${fmt(row.tax)} €</td></tr>
     `).join('') + `
-      <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${fmt(totals.revenue)} €</td></tr>`;
+      <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${fmt(totals.revenue)} €</td><td>${fmt(totals.tax)} €</td></tr>`;
   }
 
   function adExportYearReport() {
     const year = document.getElementById('ad-report-year').value;
-    const { rows, totals } = adBuildYearReportRows(year);
+    const selectedMonths = adGetSelectedMonths();
+    const rows = adBuildYearReportRows(year).filter((_, i) => selectedMonths.includes(i));
+    const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
-    const lines = [['Mois', 'Réservations', 'Nuitées', 'Montant estimé (€)']];
-    rows.forEach(row => lines.push([row.month, row.count, row.nights, fmt(row.revenue)]));
-    lines.push(['Totaux', totals.count, totals.nights, fmt(totals.revenue)]);
+    const lines = [['Mois', 'Réservations', 'Nuitées', 'Montant estimé (€)', 'Taxe de séjour (€)']];
+    rows.forEach(row => lines.push([row.month, row.count, row.nights, fmt(row.revenue), fmt(row.tax)]));
+    lines.push(['Totaux', totals.count, totals.nights, fmt(totals.revenue), fmt(totals.tax)]);
     const csv = lines.map(line => line.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `rapport-studio-bellevue-${year}.csv`;
+    const monthTag = selectedMonths.length === 12 ? '' : `-${selectedMonths.map(i => String(i + 1).padStart(2, '0')).join('+')}`;
+    link.download = `rapport-studio-bellevue-${year}${monthTag}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -454,7 +511,11 @@
       clientName: document.getElementById('ad-client-name').value.trim(),
       clientContact: document.getElementById('ad-client-contact').value.trim(),
       price: document.getElementById('ad-price').value ? Number(document.getElementById('ad-price').value) : null,
+      taxAmount: document.getElementById('ad-tax-amount').value ? Number(document.getElementById('ad-tax-amount').value) : null,
       paymentMethod: document.getElementById('ad-payment-method').value,
+      adults: document.getElementById('ad-adults').value ? Number(document.getElementById('ad-adults').value) : null,
+      children: document.getElementById('ad-children').value ? Number(document.getElementById('ad-children').value) : null,
+      reference: document.getElementById('ad-reference').value.trim(),
       note: document.getElementById('ad-note').value.trim()
     };
   }
@@ -462,11 +523,15 @@
   function adFillForm(r) {
     document.getElementById('ad-start').value = r.start || '';
     document.getElementById('ad-end').value = r.end || '';
-    document.getElementById('ad-status').value = r.paymentStatus === 'paid' ? 'paid' : 'pending';
+    document.getElementById('ad-status').value = AD_STATUS_LABEL[r.paymentStatus] ? r.paymentStatus : 'pending';
     document.getElementById('ad-client-name').value = r.clientName || '';
     document.getElementById('ad-client-contact').value = r.clientContact || '';
     document.getElementById('ad-price').value = r.price != null ? r.price : '';
+    document.getElementById('ad-tax-amount').value = r.taxAmount != null ? r.taxAmount : '';
     document.getElementById('ad-payment-method').value = r.paymentMethod || '';
+    document.getElementById('ad-adults').value = r.adults != null ? r.adults : '';
+    document.getElementById('ad-children').value = r.children != null ? r.children : '';
+    document.getElementById('ad-reference').value = r.reference || '';
     document.getElementById('ad-note').value = r.note || '';
     adUpdateNightsHint();
   }
