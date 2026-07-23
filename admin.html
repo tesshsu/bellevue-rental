@@ -213,7 +213,7 @@
       <div style="overflow-x:auto;">
         <table class="ad-report-table">
           <thead>
-            <tr><th>Mois</th><th>Réservations</th><th>Nuitées</th><th>Montant estimé (€)</th><th>Taxe de séjour (€)</th></tr>
+            <tr><th>Mois</th><th>Réservations</th><th>Nuitées totales</th><th>Nuitées exonérées</th><th>Nuitées taxées</th><th>Montant estimé (€)</th><th>Taxe de séjour perçue (€)</th><th>Observation</th></tr>
           </thead>
           <tbody id="ad-report-tbody"></tbody>
         </table>
@@ -473,10 +473,11 @@
   const AD_MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
   function adMonthlyBuckets(sourceFilter) {
-    const buckets = {}; // 'YYYY-MM' -> { nights, revenue, tax, keys:Set }
+    const buckets = {}; // 'YYYY-MM' -> { nights, revenue, tax, keys:Set, sources:Set }
     Object.entries(_adRanges).forEach(([key, r]) => {
       if (!r.start || !r.end) return;
-      if (sourceFilter && !sourceFilter.has(r.source || 'unspecified')) return;
+      const src = r.source || 'unspecified';
+      if (sourceFilter && !sourceFilter.has(src)) return;
       const nights = adNightsBetween(r.start, r.end);
       if (nights <= 0) return;
       const perNight = r.price ? r.price / nights : 0;
@@ -485,15 +486,25 @@
       const end = new Date(r.end + 'T00:00:00');
       while (cur < end) {
         const ym = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0');
-        if (!buckets[ym]) buckets[ym] = { nights: 0, revenue: 0, tax: 0, keys: new Set() };
+        if (!buckets[ym]) buckets[ym] = { nights: 0, revenue: 0, tax: 0, keys: new Set(), sources: new Set() };
         buckets[ym].nights += 1;
         buckets[ym].revenue += perNight;
         buckets[ym].tax += perNightTax;
         buckets[ym].keys.add(key);
+        buckets[ym].sources.add(src);
         cur.setDate(cur.getDate() + 1);
       }
     });
     return buckets;
+  }
+
+  // No exemption data is tracked yet (e.g. child age thresholds for the
+  // taxe de séjour), so exempt nights default to 0 and taxed nights to
+  // the full night count — matching every row of the host's real past
+  // declarations, where nuitées exonérées has always been 0 so far.
+  function adFormatObservation(sourcesSet) {
+    if (!sourcesSet || sourcesSet.size === 0) return '';
+    return Array.from(sourcesSet).map(s => (AD_SOURCE_LABEL[s] || AD_SOURCE_LABEL.unspecified).label).join(', ');
   }
 
   function adUpdateStats() {
@@ -525,14 +536,31 @@
     return AD_MONTH_NAMES.map((name, i) => {
       const ym = year + '-' + String(i + 1).padStart(2, '0');
       const b = buckets[ym];
-      return { month: name, count: b ? b.keys.size : 0, nights: b ? b.nights : 0, revenue: b ? b.revenue : 0, tax: b ? b.tax : 0 };
+      const nights = b ? b.nights : 0;
+      const exemptNights = 0;
+      return {
+        month: name,
+        count: b ? b.keys.size : 0,
+        nights,
+        exemptNights,
+        taxedNights: nights - exemptNights,
+        revenue: b ? b.revenue : 0,
+        tax: b ? b.tax : 0,
+        sources: b ? b.sources : new Set()
+      };
     });
   }
 
   function adSumRows(rows) {
     return rows.reduce((acc, row) => ({
-      count: acc.count + row.count, nights: acc.nights + row.nights, revenue: acc.revenue + row.revenue, tax: acc.tax + row.tax
-    }), { count: 0, nights: 0, revenue: 0, tax: 0 });
+      count: acc.count + row.count,
+      nights: acc.nights + row.nights,
+      exemptNights: acc.exemptNights + row.exemptNights,
+      taxedNights: acc.taxedNights + row.taxedNights,
+      revenue: acc.revenue + row.revenue,
+      tax: acc.tax + row.tax,
+      sources: new Set([...acc.sources, ...row.sources])
+    }), { count: 0, nights: 0, exemptNights: 0, taxedNights: 0, revenue: 0, tax: 0, sources: new Set() });
   }
 
   function adRenderYearReport() {
@@ -541,9 +569,9 @@
     const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
     document.getElementById('ad-report-tbody').innerHTML = rows.map(row => `
-      <tr><td>${row.month}</td><td>${row.count}</td><td>${row.nights}</td><td>${fmt(row.revenue)} €</td><td>${fmt(row.tax)} €</td></tr>
+      <tr><td>${row.month}</td><td>${row.count}</td><td>${row.nights}</td><td>${row.exemptNights}</td><td>${row.taxedNights}</td><td>${fmt(row.revenue)} €</td><td>${fmt(row.tax)} €</td><td>${escAd(adFormatObservation(row.sources))}</td></tr>
     `).join('') + `
-      <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${fmt(totals.revenue)} €</td><td>${fmt(totals.tax)} €</td></tr>`;
+      <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${totals.exemptNights}</td><td>${totals.taxedNights}</td><td>${fmt(totals.revenue)} €</td><td>${fmt(totals.tax)} €</td><td>${escAd(adFormatObservation(totals.sources))}</td></tr>`;
   }
 
   /* ── Generic "dropdown with checkboxes" multi-select ─────────────
@@ -625,9 +653,9 @@
     const rows = adBuildYearReportRows(year, selectedSources).filter((_, i) => selectedMonths.includes(i));
     const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
-    const lines = [['Mois', 'Réservations', 'Nuitées', 'Montant estimé (€)', 'Taxe de séjour (€)']];
-    rows.forEach(row => lines.push([row.month, row.count, row.nights, fmt(row.revenue), fmt(row.tax)]));
-    lines.push(['Totaux', totals.count, totals.nights, fmt(totals.revenue), fmt(totals.tax)]);
+    const lines = [['Mois', 'Réservations', 'Nombre Total nuitées', 'Nombre de nuitées exonérées', 'Nombre de nuitées taxées', 'Montant estimé (€)', 'Montant Taxe de Séjour perçue (€)', 'Observation']];
+    rows.forEach(row => lines.push([row.month, row.count, row.nights, row.exemptNights, row.taxedNights, fmt(row.revenue), fmt(row.tax), adFormatObservation(row.sources)]));
+    lines.push(['Totaux', totals.count, totals.nights, totals.exemptNights, totals.taxedNights, fmt(totals.revenue), fmt(totals.tax), adFormatObservation(totals.sources)]);
     const csv = lines.map(line => line.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
