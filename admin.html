@@ -50,6 +50,7 @@
   .ad-res-dates { font-weight: 800; color: #0f172a; font-size: 0.9rem; }
   .ad-res-nights { font-weight: 500; color: #64748b; font-size: 0.78rem; margin-left: 0.4rem; }
   .ad-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
     font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 99px; white-space: nowrap;
   }
   .ad-badge-paid { background: #dcfce7; color: #065f46; }
@@ -387,11 +388,11 @@
     not_charged: { label: 'Non chargé', cls: 'ad-badge-notcharged' }
   };
   const AD_SOURCE_LABEL = {
-    direct: { label: 'Direct', cls: 'ad-badge-source-direct' },
-    airbnb: { label: 'Airbnb', cls: 'ad-badge-source-airbnb' },
-    booking: { label: 'Booking.com', cls: 'ad-badge-source-booking' },
-    other: { label: 'Autre', cls: 'ad-badge-source-other' },
-    unspecified: { label: 'Non précisé', cls: 'ad-badge-source-unspecified' }
+    direct: { label: 'Direct', cls: 'ad-badge-source-direct', icon: 'fas fa-house' },
+    airbnb: { label: 'Airbnb', cls: 'ad-badge-source-airbnb', icon: 'fab fa-airbnb' },
+    booking: { label: 'Booking.com', cls: 'ad-badge-source-booking', icon: 'fas fa-globe' },
+    other: { label: 'Autre', cls: 'ad-badge-source-other', icon: 'fas fa-ellipsis' },
+    unspecified: { label: 'Non précisé', cls: 'ad-badge-source-unspecified', icon: 'fas fa-circle-question' }
   };
 
   function initRangeListener() {
@@ -429,7 +430,7 @@
       const nights = r.nights || adNightsBetween(r.start, r.end);
       const status = AD_STATUS_LABEL[r.paymentStatus] || AD_STATUS_LABEL.pending;
       const source = AD_SOURCE_LABEL[r.source] || AD_SOURCE_LABEL.unspecified;
-      const badge = `<span class="ad-badge ${status.cls}">${status.label}</span> <span class="ad-badge ${source.cls}">${source.label}</span>`;
+      const badge = `<span class="ad-badge ${status.cls}">${status.label}</span> <span class="ad-badge ${source.cls}"><i class="${source.icon}"></i> ${source.label}</span>`;
       const clientLine = r.clientName || r.clientContact
         ? `<div><i class="fas fa-user"></i>${escAd(r.clientName || 'Client')}${r.clientContact ? ' (' + escAd(r.clientContact) + ')' : ''}</div>`
         : '';
