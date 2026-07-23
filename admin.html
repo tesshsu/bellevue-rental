@@ -69,6 +69,19 @@
   }
   .ad-del-btn:hover { background: #fee2e2; }
   .ad-empty { color: #94a3b8; font-size: 0.82rem; padding: 0.5rem 0; }
+
+  .ad-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+  @media (max-width: 600px) { .ad-stats-grid { grid-template-columns: 1fr; } }
+  .ad-stat-tile { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem 1.1rem; }
+  .ad-stat-value { font-size: 1.5rem; font-weight: 800; color: #065f46; }
+  .ad-stat-label { font-size: 0.72rem; color: #059669; font-weight: 600; margin-top: 0.15rem; }
+
+  .ad-report-controls { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+  .ad-report-year-field select { width: auto; min-width: 7rem; }
+  .ad-report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .ad-report-table th, .ad-report-table td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #f1f5f9; }
+  .ad-report-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
+  .ad-report-table tbody tr:last-child { font-weight: 800; color: #0f172a; background: #f8fafc; }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen">
@@ -104,6 +117,43 @@
         <span id="auth-badge" style="font-size:0.78rem;color:#64748b;margin-right:1rem;"></span>
         <a href="index.html" style="font-size:0.78rem;color:#059669;text-decoration:none;margin-right:1rem;"><i class="fas fa-arrow-left"></i> Voir le site</a>
         <button onclick="adminSignOut()" style="font-size:0.78rem;color:#b91c1c;background:none;border:none;cursor:pointer;">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-title"><i class="fas fa-chart-simple" style="color:#059669;"></i> Aperçu</div>
+      <div class="ad-stats-grid">
+        <div class="ad-stat-tile">
+          <div class="ad-stat-value" id="ad-stat-count">0</div>
+          <div class="ad-stat-label">Réservations (total)</div>
+        </div>
+        <div class="ad-stat-tile">
+          <div class="ad-stat-value" id="ad-stat-nights">0</div>
+          <div class="ad-stat-label">Nuitées (total)</div>
+        </div>
+        <div class="ad-stat-tile">
+          <div class="ad-stat-value" id="ad-stat-revenue">0 €</div>
+          <div class="ad-stat-label">Montant estimé (total)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-title"><i class="fas fa-file-invoice" style="color:#059669;"></i> Rapport annuel</div>
+      <div class="ad-report-controls">
+        <div class="ad-report-year-field">
+          <label class="br-label" for="ad-report-year">Année</label>
+          <select class="br-input" id="ad-report-year"></select>
+        </div>
+        <button class="ad-add-btn" id="ad-export-btn" onclick="adExportYearReport()"><i class="fas fa-file-export"></i> Exporter (CSV)</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ad-report-table">
+          <thead>
+            <tr><th>Mois</th><th>Réservations</th><th>Nuitées</th><th>Montant estimé (€)</th></tr>
+          </thead>
+          <tbody id="ad-report-tbody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -242,6 +292,7 @@
     firebase.database().ref('bookedRanges').on('value', snap => {
       _adRanges = snap.val() || {};
       renderRangeList();
+      adUpdateStats();
     });
   }
 
@@ -297,6 +348,102 @@
 
   function escAd(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Stats & annual report ─────────────────────────────────────
+     Nights (and their prorated share of the price) are attributed to
+     the calendar month each individual night falls in, so a stay that
+     crosses a month boundary (e.g. 27 July → 2 August) is split
+     correctly across both months instead of being counted only under
+     its check-in month.
+  */
+  const AD_MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  function adMonthlyBuckets() {
+    const buckets = {}; // 'YYYY-MM' -> { nights, revenue, keys:Set }
+    Object.entries(_adRanges).forEach(([key, r]) => {
+      if (!r.start || !r.end) return;
+      const nights = adNightsBetween(r.start, r.end);
+      if (nights <= 0) return;
+      const perNight = r.price ? r.price / nights : 0;
+      const cur = new Date(r.start + 'T00:00:00');
+      const end = new Date(r.end + 'T00:00:00');
+      while (cur < end) {
+        const ym = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0');
+        if (!buckets[ym]) buckets[ym] = { nights: 0, revenue: 0, keys: new Set() };
+        buckets[ym].nights += 1;
+        buckets[ym].revenue += perNight;
+        buckets[ym].keys.add(key);
+        cur.setDate(cur.getDate() + 1);
+      }
+    });
+    return buckets;
+  }
+
+  function adUpdateStats() {
+    const entries = Object.values(_adRanges);
+    const totalCount = entries.length;
+    const totalNights = entries.reduce((sum, r) => sum + (r.start && r.end ? adNightsBetween(r.start, r.end) : 0), 0);
+    const totalRevenue = entries.reduce((sum, r) => sum + (r.price || 0), 0);
+    document.getElementById('ad-stat-count').textContent = totalCount;
+    document.getElementById('ad-stat-nights').textContent = totalNights;
+    document.getElementById('ad-stat-revenue').textContent = totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €';
+
+    adPopulateReportYears();
+    adRenderYearReport();
+  }
+
+  function adPopulateReportYears() {
+    const select = document.getElementById('ad-report-year');
+    const years = new Set(Object.values(_adRanges).filter(r => r.start).map(r => r.start.slice(0, 4)));
+    const currentYear = String(new Date().getFullYear());
+    years.add(currentYear);
+    const sorted = Array.from(years).sort((a, b) => b.localeCompare(a));
+    const prevValue = select.value || currentYear;
+    select.innerHTML = sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+    select.value = sorted.includes(prevValue) ? prevValue : sorted[0];
+  }
+
+  function adBuildYearReportRows(year) {
+    const buckets = adMonthlyBuckets();
+    const rows = AD_MONTH_NAMES.map((name, i) => {
+      const ym = year + '-' + String(i + 1).padStart(2, '0');
+      const b = buckets[ym];
+      return { month: name, count: b ? b.keys.size : 0, nights: b ? b.nights : 0, revenue: b ? b.revenue : 0 };
+    });
+    const totals = rows.reduce((acc, row) => ({
+      count: acc.count + row.count, nights: acc.nights + row.nights, revenue: acc.revenue + row.revenue
+    }), { count: 0, nights: 0, revenue: 0 });
+    return { rows, totals };
+  }
+
+  function adRenderYearReport() {
+    const year = document.getElementById('ad-report-year').value;
+    const { rows, totals } = adBuildYearReportRows(year);
+    const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+    document.getElementById('ad-report-tbody').innerHTML = rows.map(row => `
+      <tr><td>${row.month}</td><td>${row.count}</td><td>${row.nights}</td><td>${fmt(row.revenue)} €</td></tr>
+    `).join('') + `
+      <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${fmt(totals.revenue)} €</td></tr>`;
+  }
+
+  function adExportYearReport() {
+    const year = document.getElementById('ad-report-year').value;
+    const { rows, totals } = adBuildYearReportRows(year);
+    const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+    const lines = [['Mois', 'Réservations', 'Nuitées', 'Montant estimé (€)']];
+    rows.forEach(row => lines.push([row.month, row.count, row.nights, fmt(row.revenue)]));
+    lines.push(['Totaux', totals.count, totals.nights, fmt(totals.revenue)]);
+    const csv = lines.map(line => line.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rapport-studio-bellevue-${year}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   function adReadForm() {
@@ -379,6 +526,7 @@
 
   document.getElementById('ad-start').addEventListener('change', adUpdateNightsHint);
   document.getElementById('ad-end').addEventListener('change', adUpdateNightsHint);
+  document.getElementById('ad-report-year').addEventListener('change', adRenderYearReport);
   </script>
 </body>
 </html>
