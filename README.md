@@ -84,13 +84,17 @@ community/association project.
      "rules": {
        "bookedRanges": {
          ".read": true,
-         ".write": "auth != null && auth.token.email == 'tess.hsu@gmail.com'"
+         ".write": "auth != null && (auth.token.email == 'tess.hsu@gmail.com' || auth.token.email == 'alexandre.chatiron@gmail.com')"
        }
      }
    }
    ```
-   → **Publish**. This lets anyone view the calendar, but only your
-   Google account can add/remove booked dates.
+   → **Publish**. This lets anyone view the calendar, but only the
+   Google accounts listed there can add/remove booked dates. Keep this
+   list in sync with `BR_ADMIN_EMAILS` in `assets/js/firebase-config.js`
+   — the JS array gates the admin page's UI, this rule gates the actual
+   database writes, and Firebase Authentication → Sign-in method →
+   Google must be enabled for both accounts to sign in at all.
 4. **Project settings** (gear icon) → **General** → scroll to "Your apps"
    → click the web icon `</>` → register an app (nickname:
    `bellevue-rental-web`) → copy the `firebaseConfig` values it shows you.
@@ -104,8 +108,9 @@ shows every date as available (no booked ranges to read yet).
 
 ### 4. Using the admin page day-to-day
 
-Once step 3 is done, visit `admin.html`, sign in with your Google
-account (`tess.hsu@gmail.com`), and after you confirm a guest by email,
+Once step 3 is done, visit `admin.html`, sign in with one of the Google
+accounts listed in `BR_ADMIN_EMAILS` (currently `tess.hsu@gmail.com` and
+`alexandre.chatiron@gmail.com`), and after you confirm a guest by email,
 add their stay: check-in date, check-out date, and an optional note
 (guest name). **Check-out is exclusive** — for a stay from the 10th to
 the 14th, enter check-in `10` and check-out `14` (the night of the 13th

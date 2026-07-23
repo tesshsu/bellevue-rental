@@ -6,7 +6,8 @@
    Realtime Database and Google Sign-In (for admin.html) are set up.
    One thing to double-check: Realtime Database → Rules tab should have
    the rules from this repo's README (public read, write restricted to
-   tess.hsu@gmail.com) — paste them there and Publish if not done yet.
+   the accounts listed in BR_ADMIN_EMAILS below) — paste them there and
+   Publish if not done yet.
 */
 'use strict';
 
@@ -20,9 +21,9 @@ const BR_FB_CONFIG = {
   appId:             '1:523092033927:web:6b3103aa783c866bf39322'
 };
 
-// Owner's Google account — the only email allowed to write booked dates.
+// Google accounts allowed to sign in to admin.html and write booked dates.
 // Must match the rules you publish in Firebase (see README).
-const BR_ADMIN_EMAIL = 'tess.hsu@gmail.com';
+const BR_ADMIN_EMAILS = ['tess.hsu@gmail.com', 'alexandre.chatiron@gmail.com'];
 
 function brFirebaseReady() {
   return typeof firebase !== 'undefined' && BR_FB_CONFIG.databaseURL.indexOf('TODO_') === -1;

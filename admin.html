@@ -243,7 +243,7 @@
       const overlay = document.getElementById('auth-overlay');
       const errorEl = document.getElementById('signin-error');
       if (!user) { overlay.style.display = 'flex'; return; }
-      if (user.email === BR_ADMIN_EMAIL) {
+      if (BR_ADMIN_EMAILS.includes(user.email)) {
         overlay.style.display = 'none';
         document.getElementById('auth-badge').textContent = user.email;
         initRangeListener();
