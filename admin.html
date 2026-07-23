@@ -114,6 +114,12 @@
   .ad-report-table th, .ad-report-table td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #f1f5f9; }
   .ad-report-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
   .ad-report-table tbody tr:last-child { font-weight: 800; color: #0f172a; background: #f8fafc; }
+
+  .ad-mairie-block { margin-top: 1.25rem; padding-top: 1.1rem; border-top: 1px solid #e2e8f0; }
+  .ad-mairie-title { font-size: 0.82rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.75rem; }
+  .ad-mairie-title i { color: #059669; }
+  .ad-mairie-row { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .ad-mairie-note { font-size: 0.72rem; color: #64748b; line-height: 1.6; }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen">
@@ -186,8 +192,10 @@
           </button>
           <div class="ad-msel-panel" id="ad-msel-months-panel" hidden>
             <div class="ad-msel-actions">
-              <button type="button" onclick="adMselSetAll('months', true)">Tout sélectionner</button>
-              <button type="button" onclick="adMselSetAll('months', false)">Tout désélectionner</button>
+              <button type="button" onclick="adMselSetAll('months', true)">Tout</button>
+              <button type="button" onclick="adMselSetRange('months', 0, 5)">1er sem.</button>
+              <button type="button" onclick="adMselSetRange('months', 6, 11)">2e sem.</button>
+              <button type="button" onclick="adMselSetAll('months', false)">Aucun</button>
             </div>
             <div class="ad-msel-options" id="ad-msel-months-options"></div>
           </div>
@@ -217,6 +225,23 @@
           </thead>
           <tbody id="ad-report-tbody"></tbody>
         </table>
+      </div>
+
+      <div class="ad-mairie-block">
+        <div class="ad-mairie-title"><i class="fas fa-building-columns"></i> Déclaration semestrielle — Mairie de Saint-Vallier-de-Thiey</div>
+        <div class="ad-mairie-row">
+          <div>
+            <label class="br-label" for="ad-registration-number">N° immatriculation du logeur</label>
+            <input class="br-input" type="text" id="ad-registration-number" placeholder="ex : 0646..." style="min-width:12rem;">
+          </div>
+          <button class="ad-add-btn" id="ad-export-mairie-btn" onclick="adExportMairieDeclaration()"><i class="fas fa-file-export"></i> Exporter déclaration Mairie</button>
+        </div>
+        <div class="ad-mairie-note">
+          Utilise l'Année et les Mois sélectionnés ci-dessus (les boutons "1er sem." / "2e sem." dans le sélecteur de mois
+          correspondent aux périodes de déclaration). Une ligne par réservation, triée par date d'arrivée — seules les
+          réservations <strong>Airbnb</strong> et <strong>Booking.com</strong> sont incluses, quel que soit le filtre
+          Canal de réservation ci-dessus, puisque ce sont les seules concernées par cette déclaration.
+        </div>
       </div>
     </div>
 
@@ -633,6 +658,11 @@
     adMselRender(key);
   }
 
+  function adMselSetRange(key, fromIdx, toIdx) {
+    _adMselState[key] = new Set(_adMselItems[key].slice(fromIdx, toIdx + 1).map(it => it.value));
+    adMselRender(key);
+  }
+
   function adMselTogglePanel(key) {
     document.querySelectorAll('.ad-msel-panel').forEach(p => {
       if (p.id !== `ad-msel-${key}-panel`) p.hidden = true;
@@ -646,9 +676,26 @@
     });
   });
 
+  function adSelectedMonths() {
+    return _adMselState.months.size ? Array.from(_adMselState.months).map(Number) : AD_MONTH_ITEMS.map((_, i) => i);
+  }
+
+  function adDownloadCsv(filename, lines) {
+    const csv = lines.map(line => line.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   function adExportYearReport() {
     const year = document.getElementById('ad-report-year').value;
-    const selectedMonths = _adMselState.months.size ? Array.from(_adMselState.months).map(Number) : AD_MONTH_ITEMS.map((_, i) => i);
+    const selectedMonths = adSelectedMonths();
     const selectedSources = _adMselState.sources.size ? _adMselState.sources : new Set(AD_SOURCE_ITEMS.map(it => it.value));
     const rows = adBuildYearReportRows(year, selectedSources).filter((_, i) => selectedMonths.includes(i));
     const totals = adSumRows(rows);
@@ -656,18 +703,63 @@
     const lines = [['Mois', 'Réservations', 'Nombre Total nuitées', 'Nombre de nuitées exonérées', 'Nombre de nuitées taxées', 'Montant estimé (€)', 'Montant Taxe de Séjour perçue (€)', 'Observation']];
     rows.forEach(row => lines.push([row.month, row.count, row.nights, row.exemptNights, row.taxedNights, fmt(row.revenue), fmt(row.tax), adFormatObservation(row.sources)]));
     lines.push(['Totaux', totals.count, totals.nights, totals.exemptNights, totals.taxedNights, fmt(totals.revenue), fmt(totals.tax), adFormatObservation(totals.sources)]);
-    const csv = lines.map(line => line.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
     const monthTag = selectedMonths.length === 12 ? '' : `-${selectedMonths.map(i => String(i + 1).padStart(2, '0')).join('+')}`;
     const sourceTag = selectedSources.size === AD_SOURCE_ITEMS.length ? '' : `-${Array.from(selectedSources).join('+')}`;
-    link.download = `rapport-studio-bellevue-${year}${monthTag}${sourceTag}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    adDownloadCsv(`rapport-studio-bellevue-${year}${monthTag}${sourceTag}.csv`, lines);
+  }
+
+  /* ── Mairie semester declaration export ──────────────────────────
+     One row per reservation (not a monthly aggregate), matching the
+     municipal "Déclaration de meublé" spreadsheet format. Only
+     Airbnb/Booking.com reservations are ever included — the Canal de
+     réservation picker above is ignored here on purpose, since Direct/
+     Autre stays aren't part of this specific declaration.
+  */
+  const AD_MAIRIE_SOURCES = new Set(['airbnb', 'booking']);
+  const AD_REG_NUMBER_KEY = 'br_admin_registration_number';
+
+  function adBuildMairieRows(year, months) {
+    const registrationNumber = document.getElementById('ad-registration-number').value.trim();
+    const monthSet = new Set(months);
+    return Object.values(_adRanges)
+      .filter(r => {
+        if (!r.start || !r.end) return false;
+        if (!AD_MAIRIE_SOURCES.has(r.source)) return false;
+        const [y, m] = r.start.split('-');
+        return y === String(year) && monthSet.has(Number(m) - 1);
+      })
+      .sort((a, b) => a.start.localeCompare(b.start))
+      .map((r, i) => {
+        const nights = r.nights || adNightsBetween(r.start, r.end);
+        const source = AD_SOURCE_LABEL[r.source];
+        return {
+          order: i + 1,
+          registrationNumber,
+          reference: r.reference || '',
+          start: r.start,
+          end: r.end,
+          nights,
+          adults: r.adults || 0,
+          children: r.children || 0,
+          tax: r.taxAmount || 0,
+          observation: `Collecte par ${source.label.toUpperCase()}`
+        };
+      });
+  }
+
+  function adExportMairieDeclaration() {
+    const year = document.getElementById('ad-report-year').value;
+    const rows = adBuildMairieRows(year, adSelectedMonths());
+    const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+    const lines = [[
+      "N°d'ordre", 'N° immatriculation du logeur', 'N° de référence', "Date d'arrivée", 'Date de départ',
+      'Durée du séjour', "Nombre d'adultes", 'Nombre d\'enfants (-13 ans)', 'Total nuitées', 'Taxe encaissement', 'Observations'
+    ]];
+    rows.forEach(r => lines.push([
+      r.order, r.registrationNumber, r.reference, r.start, r.end, r.nights, r.adults, r.children, r.nights, fmt(r.tax), r.observation
+    ]));
+    const monthTag = rows.length && adSelectedMonths().length !== 12 ? `-${adSelectedMonths().map(i => String(i + 1).padStart(2, '0')).join('+')}` : '';
+    adDownloadCsv(`declaration-mairie-studio-bellevue-${year}${monthTag}.csv`, lines);
   }
 
   function adReadForm() {
@@ -763,6 +855,10 @@
   document.getElementById('ad-report-year').addEventListener('change', adRenderYearReport);
   adMselRender('months');
   adMselRender('sources');
+
+  const adRegInput = document.getElementById('ad-registration-number');
+  adRegInput.value = localStorage.getItem(AD_REG_NUMBER_KEY) || '';
+  adRegInput.addEventListener('input', () => localStorage.setItem(AD_REG_NUMBER_KEY, adRegInput.value));
   </script>
 </body>
 </html>
