@@ -54,6 +54,10 @@
   }
   .ad-badge-paid { background: #dcfce7; color: #065f46; }
   .ad-badge-pending { background: #fef3c7; color: #92400e; }
+  .ad-badge-source-direct { background: #dcfce7; color: #065f46; }
+  .ad-badge-source-airbnb { background: #ffe4e9; color: #9d174d; }
+  .ad-badge-source-booking { background: #dbeafe; color: #1e3a8a; }
+  .ad-badge-source-other, .ad-badge-source-unspecified { background: #f1f5f9; color: #475569; }
   .ad-res-meta { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; color: #334155; margin-bottom: 0.5rem; }
   .ad-res-meta i { width: 1rem; color: #059669; text-align: center; margin-right: 0.3rem; }
   .ad-res-notes { font-size: 0.78rem; color: #64748b; background: #f8fafc; border-radius: 8px; padding: 0.5rem 0.7rem; margin-bottom: 0.65rem; }
@@ -78,8 +82,33 @@
 
   .ad-report-controls { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
   .ad-report-year-field select { width: auto; min-width: 7rem; }
-  #ad-report-months { width: auto; min-width: 10rem; padding: 0.35rem 0.5rem; }
   .ad-badge-notcharged { background: #e2e8f0; color: #334155; }
+
+  .ad-msel { position: relative; }
+  .ad-msel-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+    min-width: 12rem; max-width: 16rem; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #cbd5e1;
+    background: #fff; font-size: 0.82rem; color: #0f172a; cursor: pointer; text-align: left;
+  }
+  .ad-msel-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ad-msel-btn:hover { border-color: #94a3b8; }
+  .ad-msel-btn i { color: #64748b; font-size: 0.7rem; flex-shrink: 0; }
+  .ad-msel-panel {
+    position: absolute; top: calc(100% + 0.35rem); left: 0; z-index: 20; min-width: 14rem;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 8px 24px rgba(15,23,42,0.14);
+    padding: 0.6rem; max-height: 16rem; overflow-y: auto;
+  }
+  .ad-msel-actions { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f1f5f9; }
+  .ad-msel-actions button {
+    flex: 1; font-size: 0.68rem; font-weight: 700; color: #059669; background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 6px; padding: 0.3rem 0.4rem; cursor: pointer;
+  }
+  .ad-msel-actions button:hover { background: #dcfce7; }
+  .ad-msel-options { display: flex; flex-direction: column; gap: 0.3rem; }
+  .ad-msel-option { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #334155; cursor: pointer; padding: 0.2rem 0.3rem; border-radius: 6px; }
+  .ad-msel-option:hover { background: #f8fafc; }
+  .ad-msel-option input { accent-color: #059669; width: 14px; height: 14px; cursor: pointer; }
+
   .ad-report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
   .ad-report-table th, .ad-report-table td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #f1f5f9; }
   .ad-report-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
@@ -147,10 +176,37 @@
           <label class="br-label" for="ad-report-year">Année</label>
           <select class="br-input" id="ad-report-year"></select>
         </div>
-        <div>
-          <label class="br-label" for="ad-report-months">Mois à exporter <span style="font-weight:400;text-transform:none;opacity:0.6;">(Ctrl/Cmd-clic pour plusieurs)</span></label>
-          <select class="br-input" id="ad-report-months" multiple size="6"></select>
+
+        <div class="ad-msel" id="ad-msel-months">
+          <label class="br-label">Mois à exporter</label>
+          <button type="button" class="ad-msel-btn" onclick="adMselTogglePanel('months')">
+            <span id="ad-msel-months-label">Tous les mois</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="ad-msel-panel" id="ad-msel-months-panel" hidden>
+            <div class="ad-msel-actions">
+              <button type="button" onclick="adMselSetAll('months', true)">Tout sélectionner</button>
+              <button type="button" onclick="adMselSetAll('months', false)">Tout désélectionner</button>
+            </div>
+            <div class="ad-msel-options" id="ad-msel-months-options"></div>
+          </div>
         </div>
+
+        <div class="ad-msel" id="ad-msel-sources">
+          <label class="br-label">Canal de réservation</label>
+          <button type="button" class="ad-msel-btn" onclick="adMselTogglePanel('sources')">
+            <span id="ad-msel-sources-label">Tous les canaux</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="ad-msel-panel" id="ad-msel-sources-panel" hidden>
+            <div class="ad-msel-actions">
+              <button type="button" onclick="adMselSetAll('sources', true)">Tout sélectionner</button>
+              <button type="button" onclick="adMselSetAll('sources', false)">Tout désélectionner</button>
+            </div>
+            <div class="ad-msel-options" id="ad-msel-sources-options"></div>
+          </div>
+        </div>
+
         <button class="ad-add-btn" id="ad-export-btn" onclick="adExportYearReport()"><i class="fas fa-file-export"></i> Exporter (CSV)</button>
       </div>
       <div style="overflow-x:auto;">
@@ -191,10 +247,20 @@
         <div class="ad-full ad-nights-hint" id="ad-nights-hint"></div>
 
         <div>
+          <label class="br-label" for="ad-source">Canal de réservation</label>
+          <select class="br-input" id="ad-source">
+            <option value="">— Non précisé —</option>
+            <option value="direct">Direct</option>
+            <option value="airbnb">Airbnb</option>
+            <option value="booking">Booking.com</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+        <div>
           <label class="br-label" for="ad-client-name">Nom du client</label>
           <input class="br-input" type="text" id="ad-client-name" placeholder="ex : Elsa (Cipsa)">
         </div>
-        <div style="grid-column: span 2;">
+        <div>
           <label class="br-label" for="ad-client-contact">E-mail / Téléphone</label>
           <input class="br-input" type="text" id="ad-client-contact" placeholder="ex : esung@cipsacircuits.com">
         </div>
@@ -300,12 +366,14 @@
   /* ── Reservations: list + add/edit + delete ────────────────────
      Schema stored in Firebase under bookedRanges/<pushId>:
      { start, end, note, reference, clientName, clientContact,
+       source: ''|'direct'|'airbnb'|'booking'|'other',
        paymentStatus: 'paid'|'pending'|'not_charged',
        paymentMethod: ''|'cash'|'check'|'transfer'|'stripe',
        price: number|null, taxAmount: number|null,
        adults: number|null, children: number|null, nights: number }
      Older entries may only have {start,end,note} — rendering below
-     falls back gracefully for any missing field.
+     falls back gracefully for any missing field. A blank/missing
+     `source` is bucketed as 'unspecified' for the source filter below.
   */
   let _adRanges = {}; // { pushId: {...} }
   let _adEditingKey = null;
@@ -317,6 +385,13 @@
     paid: { label: 'Payé', cls: 'ad-badge-paid' },
     pending: { label: 'En attente', cls: 'ad-badge-pending' },
     not_charged: { label: 'Non chargé', cls: 'ad-badge-notcharged' }
+  };
+  const AD_SOURCE_LABEL = {
+    direct: { label: 'Direct', cls: 'ad-badge-source-direct' },
+    airbnb: { label: 'Airbnb', cls: 'ad-badge-source-airbnb' },
+    booking: { label: 'Booking.com', cls: 'ad-badge-source-booking' },
+    other: { label: 'Autre', cls: 'ad-badge-source-other' },
+    unspecified: { label: 'Non précisé', cls: 'ad-badge-source-unspecified' }
   };
 
   function initRangeListener() {
@@ -353,7 +428,8 @@
     el.innerHTML = entries.map(([key, r]) => {
       const nights = r.nights || adNightsBetween(r.start, r.end);
       const status = AD_STATUS_LABEL[r.paymentStatus] || AD_STATUS_LABEL.pending;
-      const badge = `<span class="ad-badge ${status.cls}">${status.label}</span>`;
+      const source = AD_SOURCE_LABEL[r.source] || AD_SOURCE_LABEL.unspecified;
+      const badge = `<span class="ad-badge ${status.cls}">${status.label}</span> <span class="ad-badge ${source.cls}">${source.label}</span>`;
       const clientLine = r.clientName || r.clientContact
         ? `<div><i class="fas fa-user"></i>${escAd(r.clientName || 'Client')}${r.clientContact ? ' (' + escAd(r.clientContact) + ')' : ''}</div>`
         : '';
@@ -395,10 +471,11 @@
   */
   const AD_MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-  function adMonthlyBuckets() {
+  function adMonthlyBuckets(sourceFilter) {
     const buckets = {}; // 'YYYY-MM' -> { nights, revenue, tax, keys:Set }
     Object.entries(_adRanges).forEach(([key, r]) => {
       if (!r.start || !r.end) return;
+      if (sourceFilter && !sourceFilter.has(r.source || 'unspecified')) return;
       const nights = adNightsBetween(r.start, r.end);
       if (nights <= 0) return;
       const perNight = r.price ? r.price / nights : 0;
@@ -428,7 +505,6 @@
     document.getElementById('ad-stat-revenue').textContent = totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €';
 
     adPopulateReportYears();
-    adPopulateReportMonths();
     adRenderYearReport();
   }
 
@@ -443,25 +519,13 @@
     select.value = sorted.includes(prevValue) ? prevValue : sorted[0];
   }
 
-  function adPopulateReportMonths() {
-    const select = document.getElementById('ad-report-months');
-    if (select.options.length) return; // populate once — all months, all selected by default
-    select.innerHTML = AD_MONTH_NAMES.map((name, i) => `<option value="${i}" selected>${name}</option>`).join('');
-  }
-
-  function adGetSelectedMonths() {
-    const selected = Array.from(document.getElementById('ad-report-months').selectedOptions).map(o => Number(o.value));
-    return selected.length ? selected : AD_MONTH_NAMES.map((_, i) => i); // none selected = export all
-  }
-
-  function adBuildYearReportRows(year) {
-    const buckets = adMonthlyBuckets();
-    const rows = AD_MONTH_NAMES.map((name, i) => {
+  function adBuildYearReportRows(year, sourceFilter) {
+    const buckets = adMonthlyBuckets(sourceFilter);
+    return AD_MONTH_NAMES.map((name, i) => {
       const ym = year + '-' + String(i + 1).padStart(2, '0');
       const b = buckets[ym];
       return { month: name, count: b ? b.keys.size : 0, nights: b ? b.nights : 0, revenue: b ? b.revenue : 0, tax: b ? b.tax : 0 };
     });
-    return rows;
   }
 
   function adSumRows(rows) {
@@ -472,7 +536,7 @@
 
   function adRenderYearReport() {
     const year = document.getElementById('ad-report-year').value;
-    const rows = adBuildYearReportRows(year);
+    const rows = adBuildYearReportRows(year, null); // on-screen preview always shows everything
     const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
     document.getElementById('ad-report-tbody').innerHTML = rows.map(row => `
@@ -481,10 +545,83 @@
       <tr><td>Totaux</td><td>${totals.count}</td><td>${totals.nights}</td><td>${fmt(totals.revenue)} €</td><td>${fmt(totals.tax)} €</td></tr>`;
   }
 
+  /* ── Generic "dropdown with checkboxes" multi-select ─────────────
+     Used for both the month picker and the booking-channel picker in
+     the export controls — a plain <select multiple> relies on Ctrl/
+     Cmd-click, which is unintuitive and unusable on touch, so this
+     renders checkboxes in a popover instead, with Select-all/Clear
+     shortcuts. State lives in _adMselState[key] as a Set of values;
+     leaving a picker empty is treated as "no filter" (= everything)
+     everywhere it's read, so the export button never appears to do
+     nothing just because a picker was cleared.
+  */
+  const AD_MONTH_ITEMS = AD_MONTH_NAMES.map((name, i) => ({ value: String(i), label: name }));
+  const AD_SOURCE_ITEMS = [
+    { value: 'direct', label: 'Direct' },
+    { value: 'airbnb', label: 'Airbnb' },
+    { value: 'booking', label: 'Booking.com' },
+    { value: 'other', label: 'Autre' },
+    { value: 'unspecified', label: 'Non précisé' }
+  ];
+  const _adMselItems = { months: AD_MONTH_ITEMS, sources: AD_SOURCE_ITEMS };
+  const _adMselAllLabel = { months: 'Tous les mois', sources: 'Tous les canaux' };
+  const _adMselState = {
+    months: new Set(AD_MONTH_ITEMS.map(it => it.value)),
+    sources: new Set(AD_SOURCE_ITEMS.map(it => it.value))
+  };
+
+  function adMselRender(key) {
+    const items = _adMselItems[key];
+    const state = _adMselState[key];
+    document.getElementById(`ad-msel-${key}-options`).innerHTML = items.map(it => `
+      <label class="ad-msel-option">
+        <input type="checkbox" ${state.has(it.value) ? 'checked' : ''} onchange="adMselToggle('${key}','${it.value}',this.checked)">
+        <span>${it.label}</span>
+      </label>`).join('');
+    adMselUpdateLabel(key);
+  }
+
+  function adMselUpdateLabel(key) {
+    const items = _adMselItems[key];
+    const state = _adMselState[key];
+    const labelEl = document.getElementById(`ad-msel-${key}-label`);
+    if (state.size === 0 || state.size === items.length) {
+      labelEl.textContent = _adMselAllLabel[key];
+    } else if (state.size <= 2) {
+      labelEl.textContent = items.filter(it => state.has(it.value)).map(it => it.label).join(', ');
+    } else {
+      labelEl.textContent = `${state.size} sélectionnés`;
+    }
+  }
+
+  function adMselToggle(key, value, checked) {
+    if (checked) _adMselState[key].add(value); else _adMselState[key].delete(value);
+    adMselUpdateLabel(key);
+  }
+
+  function adMselSetAll(key, on) {
+    _adMselState[key] = on ? new Set(_adMselItems[key].map(it => it.value)) : new Set();
+    adMselRender(key);
+  }
+
+  function adMselTogglePanel(key) {
+    document.querySelectorAll('.ad-msel-panel').forEach(p => {
+      if (p.id !== `ad-msel-${key}-panel`) p.hidden = true;
+    });
+    document.getElementById(`ad-msel-${key}-panel`).toggleAttribute('hidden');
+  }
+
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.ad-msel').forEach(wrap => {
+      if (!wrap.contains(e.target)) wrap.querySelector('.ad-msel-panel').hidden = true;
+    });
+  });
+
   function adExportYearReport() {
     const year = document.getElementById('ad-report-year').value;
-    const selectedMonths = adGetSelectedMonths();
-    const rows = adBuildYearReportRows(year).filter((_, i) => selectedMonths.includes(i));
+    const selectedMonths = _adMselState.months.size ? Array.from(_adMselState.months).map(Number) : AD_MONTH_ITEMS.map((_, i) => i);
+    const selectedSources = _adMselState.sources.size ? _adMselState.sources : new Set(AD_SOURCE_ITEMS.map(it => it.value));
+    const rows = adBuildYearReportRows(year, selectedSources).filter((_, i) => selectedMonths.includes(i));
     const totals = adSumRows(rows);
     const fmt = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
     const lines = [['Mois', 'Réservations', 'Nuitées', 'Montant estimé (€)', 'Taxe de séjour (€)']];
@@ -496,7 +633,8 @@
     const link = document.createElement('a');
     link.href = url;
     const monthTag = selectedMonths.length === 12 ? '' : `-${selectedMonths.map(i => String(i + 1).padStart(2, '0')).join('+')}`;
-    link.download = `rapport-studio-bellevue-${year}${monthTag}.csv`;
+    const sourceTag = selectedSources.size === AD_SOURCE_ITEMS.length ? '' : `-${Array.from(selectedSources).join('+')}`;
+    link.download = `rapport-studio-bellevue-${year}${monthTag}${sourceTag}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -508,6 +646,7 @@
       start: document.getElementById('ad-start').value,
       end: document.getElementById('ad-end').value,
       paymentStatus: document.getElementById('ad-status').value,
+      source: document.getElementById('ad-source').value,
       clientName: document.getElementById('ad-client-name').value.trim(),
       clientContact: document.getElementById('ad-client-contact').value.trim(),
       price: document.getElementById('ad-price').value ? Number(document.getElementById('ad-price').value) : null,
@@ -524,6 +663,7 @@
     document.getElementById('ad-start').value = r.start || '';
     document.getElementById('ad-end').value = r.end || '';
     document.getElementById('ad-status').value = AD_STATUS_LABEL[r.paymentStatus] ? r.paymentStatus : 'pending';
+    document.getElementById('ad-source').value = r.source || '';
     document.getElementById('ad-client-name').value = r.clientName || '';
     document.getElementById('ad-client-contact').value = r.clientContact || '';
     document.getElementById('ad-price').value = r.price != null ? r.price : '';
@@ -592,6 +732,8 @@
   document.getElementById('ad-start').addEventListener('change', adUpdateNightsHint);
   document.getElementById('ad-end').addEventListener('change', adUpdateNightsHint);
   document.getElementById('ad-report-year').addEventListener('change', adRenderYearReport);
+  adMselRender('months');
+  adMselRender('sources');
   </script>
 </body>
 </html>
