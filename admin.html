@@ -17,23 +17,52 @@
 <script src="assets/js/firebase-config.js"></script>
 
 <style>
-  .ad-wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .ad-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
   .ad-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; }
   .ad-card-title { font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
-  .ad-form-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 0.75rem; align-items: end; }
-  @media (max-width: 700px) { .ad-form-grid { grid-template-columns: 1fr; } }
+  .ad-form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.9rem; }
+  .ad-form-grid .ad-full { grid-column: 1 / -1; }
+  @media (max-width: 700px) { .ad-form-grid { grid-template-columns: 1fr; } .ad-form-grid .ad-full { grid-column: 1; } }
+  .ad-nights-hint { font-size: 0.75rem; color: #059669; font-weight: 700; margin-top: 0.35rem; min-height: 1em; }
+  .ad-form-footer { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.1rem; }
   .ad-add-btn {
-    padding: 0.6rem 1.25rem; border-radius: 8px; border: none; background: #059669; color: #fff;
-    font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.65rem 1.4rem; border-radius: 8px; border: none; background: #059669; color: #fff;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
   }
   .ad-add-btn:hover { background: #047857; }
-  .ad-range-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;
+  .ad-cancel-btn {
+    padding: 0.65rem 1.2rem; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #475569;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 0.4rem;
   }
-  .ad-range-row:last-child { border-bottom: none; }
-  .ad-range-dates { font-weight: 700; color: #0f172a; }
-  .ad-range-note { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .ad-cancel-btn:hover { background: #f1f5f9; }
+  .ad-cancel-btn.ad-visible { display: inline-flex; }
+  .ad-editing-banner {
+    display: none; align-items: center; gap: 0.5rem; background: #fffbeb; border: 1px solid #fde68a;
+    color: #92400e; font-size: 0.78rem; font-weight: 600; border-radius: 8px; padding: 0.6rem 0.9rem; margin-bottom: 1rem;
+  }
+  .ad-editing-banner.ad-visible { display: flex; }
+
+  .ad-res-card {
+    border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.15rem; margin-bottom: 0.75rem;
+  }
+  .ad-res-card:last-child { margin-bottom: 0; }
+  .ad-res-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .ad-res-dates { font-weight: 800; color: #0f172a; font-size: 0.9rem; }
+  .ad-res-nights { font-weight: 500; color: #64748b; font-size: 0.78rem; margin-left: 0.4rem; }
+  .ad-badge {
+    font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 99px; white-space: nowrap;
+  }
+  .ad-badge-paid { background: #dcfce7; color: #065f46; }
+  .ad-badge-pending { background: #fef3c7; color: #92400e; }
+  .ad-res-meta { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; color: #334155; margin-bottom: 0.5rem; }
+  .ad-res-meta i { width: 1rem; color: #059669; text-align: center; margin-right: 0.3rem; }
+  .ad-res-notes { font-size: 0.78rem; color: #64748b; background: #f8fafc; border-radius: 8px; padding: 0.5rem 0.7rem; margin-bottom: 0.65rem; }
+  .ad-res-actions { display: flex; gap: 0.5rem; }
+  .ad-edit-btn {
+    background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 6px;
+    padding: 0.35rem 0.7rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  }
+  .ad-edit-btn:hover { background: #dbeafe; }
   .ad-del-btn {
     background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px;
     padding: 0.35rem 0.7rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
@@ -51,7 +80,7 @@
     <div style="text-align:center;max-width:340px;">
       <div style="font-size:3rem;margin-bottom:0.75rem;">🏡</div>
       <div style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.25rem;">Studio Bellevue</div>
-      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-bottom:2rem;">Administration — Gestion des disponibilités</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-bottom:2rem;">Administration — Gestion des réservations</div>
       <button id="signin-btn" onclick="adminSignIn()" style="
         display:inline-flex;align-items:center;gap:0.6rem;
         padding:0.75rem 1.75rem;border-radius:99px;border:none;cursor:pointer;
@@ -79,7 +108,12 @@
     </div>
 
     <div class="ad-card">
-      <div class="ad-card-title"><i class="fas fa-plus-circle" style="color:#059669;"></i> Ajouter une réservation confirmée</div>
+      <div class="ad-card-title" id="ad-form-title"><i class="fas fa-plus-circle" style="color:#059669;"></i> Ajouter une réservation confirmée</div>
+
+      <div class="ad-editing-banner" id="ad-editing-banner">
+        <i class="fas fa-pen"></i> Modification d'une réservation existante — les changements remplaceront l'entrée d'origine.
+      </div>
+
       <div class="ad-form-grid">
         <div>
           <label class="br-label" for="ad-start">Arrivée · Check-in</label>
@@ -90,23 +124,61 @@
           <input class="br-input" type="date" id="ad-end">
         </div>
         <div>
-          <label class="br-label" for="ad-note">Note (nom, référence…)</label>
-          <input class="br-input" type="text" id="ad-note" placeholder="ex : Famille Martin">
+          <label class="br-label" for="ad-status">Statut paiement</label>
+          <select class="br-input" id="ad-status">
+            <option value="pending">En attente</option>
+            <option value="paid">Payé</option>
+          </select>
         </div>
-        <button class="ad-add-btn" onclick="adAddRange()"><i class="fas fa-plus"></i> Ajouter</button>
+
+        <div class="ad-full ad-nights-hint" id="ad-nights-hint"></div>
+
+        <div>
+          <label class="br-label" for="ad-client-name">Nom du client</label>
+          <input class="br-input" type="text" id="ad-client-name" placeholder="ex : Elsa (Cipsa)">
+        </div>
+        <div style="grid-column: span 2;">
+          <label class="br-label" for="ad-client-contact">E-mail / Téléphone</label>
+          <input class="br-input" type="text" id="ad-client-contact" placeholder="ex : esung@cipsacircuits.com">
+        </div>
+
+        <div>
+          <label class="br-label" for="ad-price">Montant total (€)</label>
+          <input class="br-input" type="number" min="0" step="1" id="ad-price" placeholder="ex : 470">
+        </div>
+        <div style="grid-column: span 2;">
+          <label class="br-label" for="ad-payment-method">Mode de paiement</label>
+          <select class="br-input" id="ad-payment-method">
+            <option value="">— Non précisé —</option>
+            <option value="cash">Espèces</option>
+            <option value="check">Chèque</option>
+            <option value="transfer">Virement</option>
+            <option value="stripe">Carte bancaire (Stripe)</option>
+          </select>
+        </div>
+
+        <div class="ad-full">
+          <label class="br-label" for="ad-note">Notes & conditions <span style="font-weight:400;text-transform:none;opacity:0.6;">(ex : OK pour payer 1 semaine avant)</span></label>
+          <textarea class="br-textarea" id="ad-note" placeholder="ex : Famille Martin — OK pour payer 1 semaine avant"></textarea>
+        </div>
+      </div>
+
+      <div class="ad-form-footer">
+        <button class="ad-add-btn" id="ad-save-btn" onclick="adSaveReservation()"><i class="fas fa-plus"></i> Enregistrer</button>
+        <button class="ad-cancel-btn" id="ad-cancel-btn" onclick="adCancelEdit()"><i class="fas fa-xmark"></i> Annuler</button>
       </div>
       <div id="ad-error" style="color:#b91c1c;font-size:0.78rem;margin-top:0.75rem;"></div>
     </div>
 
     <div class="ad-card">
-      <div class="ad-card-title"><i class="fas fa-calendar-check" style="color:#059669;"></i> Dates bloquées / réservées</div>
+      <div class="ad-card-title"><i class="fas fa-calendar-check" style="color:#059669;"></i> Réservations bloquées</div>
       <div id="ad-range-list"><div class="ad-empty">Chargement…</div></div>
     </div>
 
     <div class="ad-card" style="background:#f0fdf4;border-color:#bbf7d0;">
       <div class="ad-card-title" style="margin-bottom:0.5rem;"><i class="fas fa-circle-info" style="color:#059669;"></i> Comment ça marche</div>
       <div style="font-size:0.8rem;color:#065f46;line-height:1.6;">
-        Quand vous confirmez un séjour par email après une demande, ajoutez-le ici. Le calendrier public sur la page d'accueil se met à jour instantanément pour tous les visiteurs. La date de départ est exclusive : pour un séjour du 10 au 14, entrez Arrivée = 10 et Départ = 14 (la nuit du 13 au 14 est la dernière occupée).
+        Quand vous confirmez un séjour par email après une demande, ajoutez-le ici. Le calendrier public sur la page d'accueil se met à jour instantanément pour tous les visiteurs. La date de départ est exclusive : pour un séjour du 10 au 14, entrez Arrivée = 10 et Départ = 14 (la nuit du 13 au 14 est la dernière occupée). Les champs client, prix et paiement restent privés — seules les dates sont visibles publiquement.
       </div>
     </div>
 
@@ -151,8 +223,20 @@
 
   async function adminSignOut() { await firebase.auth().signOut(); }
 
-  /* ── Booked ranges: list + add + delete ───────────────────────── */
-  let _adRanges = {}; // { pushId: {start,end,note} }
+  /* ── Reservations: list + add/edit + delete ────────────────────
+     Schema stored in Firebase under bookedRanges/<pushId>:
+     { start, end, note, clientName, clientContact,
+       paymentStatus: 'paid'|'pending', paymentMethod: ''|'cash'|'check'|'transfer'|'stripe',
+       price: number|null, nights: number }
+     Older entries may only have {start,end,note} — rendering below
+     falls back gracefully for any missing field.
+  */
+  let _adRanges = {}; // { pushId: {...} }
+  let _adEditingKey = null;
+
+  const AD_PAYMENT_METHOD_LABEL = {
+    cash: 'Espèces', check: 'Chèque', transfer: 'Virement', stripe: 'Carte (Stripe)'
+  };
 
   function initRangeListener() {
     firebase.database().ref('bookedRanges').on('value', snap => {
@@ -161,52 +245,140 @@
     });
   }
 
+  function adNightsBetween(start, end) {
+    if (!start || !end) return 0;
+    const ms = new Date(end + 'T00:00:00') - new Date(start + 'T00:00:00');
+    return Math.round(ms / 86400000);
+  }
+
+  function adUpdateNightsHint() {
+    const start = document.getElementById('ad-start').value;
+    const end = document.getElementById('ad-end').value;
+    const hint = document.getElementById('ad-nights-hint');
+    if (!start || !end) { hint.textContent = ''; return; }
+    const nights = adNightsBetween(start, end);
+    hint.textContent = nights > 0 ? `→ ${nights} nuit${nights > 1 ? 's' : ''}` : 'Départ doit être après arrivée';
+  }
+
   function renderRangeList() {
     const el = document.getElementById('ad-range-list');
     const entries = Object.entries(_adRanges)
       .sort((a, b) => (a[1].start || '').localeCompare(b[1].start || ''));
     if (entries.length === 0) {
-      el.innerHTML = '<div class="ad-empty">Aucune date bloquée pour le moment.</div>';
+      el.innerHTML = '<div class="ad-empty">Aucune réservation bloquée pour le moment.</div>';
       return;
     }
-    el.innerHTML = entries.map(([key, r]) => `
-      <div class="ad-range-row">
-        <div>
-          <div class="ad-range-dates">${r.start || '?'} → ${r.end || '?'}</div>
-          ${r.note ? `<div class="ad-range-note">${escAd(r.note)}</div>` : ''}
+    el.innerHTML = entries.map(([key, r]) => {
+      const nights = r.nights || adNightsBetween(r.start, r.end);
+      const isPaid = r.paymentStatus === 'paid';
+      const badge = `<span class="ad-badge ${isPaid ? 'ad-badge-paid' : 'ad-badge-pending'}">${isPaid ? 'Payé' : 'En attente'}</span>`;
+      const clientLine = r.clientName || r.clientContact
+        ? `<div><i class="fas fa-user"></i>${escAd(r.clientName || 'Client')}${r.clientContact ? ' (' + escAd(r.clientContact) + ')' : ''}</div>`
+        : '';
+      const priceLine = (r.price || r.paymentMethod)
+        ? `<div><i class="fas fa-euro-sign"></i>${r.price ? escAd(String(r.price)) + ' €' : 'Montant non précisé'}${r.paymentMethod ? ' · ' + (AD_PAYMENT_METHOD_LABEL[r.paymentMethod] || r.paymentMethod) : ''}</div>`
+        : '';
+      const notesLine = r.note ? `<div class="ad-res-notes"><i class="fas fa-message"></i> ${escAd(r.note)}</div>` : '';
+      return `
+      <div class="ad-res-card">
+        <div class="ad-res-top">
+          <div><span class="ad-res-dates">🗓️ ${r.start || '?'} → ${r.end || '?'}</span><span class="ad-res-nights">${nights > 0 ? nights + ' nuit' + (nights > 1 ? 's' : '') : ''}</span></div>
+          ${badge}
         </div>
-        <button class="ad-del-btn" onclick="adDeleteRange('${key}')"><i class="fas fa-trash"></i> Supprimer</button>
-      </div>`).join('');
+        <div class="ad-res-meta">${clientLine}${priceLine}</div>
+        ${notesLine}
+        <div class="ad-res-actions">
+          <button class="ad-edit-btn" onclick="adEditRange('${key}')"><i class="fas fa-pen"></i> Modifier</button>
+          <button class="ad-del-btn" onclick="adDeleteRange('${key}')"><i class="fas fa-trash"></i> Supprimer</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
   function escAd(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  async function adAddRange() {
-    const start = document.getElementById('ad-start').value;
-    const end = document.getElementById('ad-end').value;
-    const note = document.getElementById('ad-note').value.trim();
+  function adReadForm() {
+    return {
+      start: document.getElementById('ad-start').value,
+      end: document.getElementById('ad-end').value,
+      paymentStatus: document.getElementById('ad-status').value,
+      clientName: document.getElementById('ad-client-name').value.trim(),
+      clientContact: document.getElementById('ad-client-contact').value.trim(),
+      price: document.getElementById('ad-price').value ? Number(document.getElementById('ad-price').value) : null,
+      paymentMethod: document.getElementById('ad-payment-method').value,
+      note: document.getElementById('ad-note').value.trim()
+    };
+  }
+
+  function adFillForm(r) {
+    document.getElementById('ad-start').value = r.start || '';
+    document.getElementById('ad-end').value = r.end || '';
+    document.getElementById('ad-status').value = r.paymentStatus === 'paid' ? 'paid' : 'pending';
+    document.getElementById('ad-client-name').value = r.clientName || '';
+    document.getElementById('ad-client-contact').value = r.clientContact || '';
+    document.getElementById('ad-price').value = r.price != null ? r.price : '';
+    document.getElementById('ad-payment-method').value = r.paymentMethod || '';
+    document.getElementById('ad-note').value = r.note || '';
+    adUpdateNightsHint();
+  }
+
+  function adClearForm() {
+    adFillForm({});
+  }
+
+  function adEditRange(key) {
+    _adEditingKey = key;
+    adFillForm(_adRanges[key] || {});
+    document.getElementById('ad-form-title').innerHTML = '<i class="fas fa-pen" style="color:#059669;"></i> Modifier la réservation';
+    document.getElementById('ad-save-btn').innerHTML = '<i class="fas fa-check"></i> Enregistrer les modifications';
+    document.getElementById('ad-cancel-btn').classList.add('ad-visible');
+    document.getElementById('ad-editing-banner').classList.add('ad-visible');
+    document.getElementById('ad-error').textContent = '';
+    document.querySelector('.ad-wrap').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function adCancelEdit() {
+    _adEditingKey = null;
+    adClearForm();
+    document.getElementById('ad-form-title').innerHTML = '<i class="fas fa-plus-circle" style="color:#059669;"></i> Ajouter une réservation confirmée';
+    document.getElementById('ad-save-btn').innerHTML = '<i class="fas fa-plus"></i> Enregistrer';
+    document.getElementById('ad-cancel-btn').classList.remove('ad-visible');
+    document.getElementById('ad-editing-banner').classList.remove('ad-visible');
+    document.getElementById('ad-error').textContent = '';
+  }
+
+  async function adSaveReservation() {
+    const data = adReadForm();
     const errEl = document.getElementById('ad-error');
     errEl.textContent = '';
 
-    if (!start || !end) { errEl.textContent = 'Renseignez une date d\'arrivée et de départ.'; return; }
-    if (end <= start) { errEl.textContent = 'La date de départ doit être après la date d\'arrivée.'; return; }
+    if (!data.start || !data.end) { errEl.textContent = "Renseignez une date d'arrivée et de départ."; return; }
+    if (data.end <= data.start) { errEl.textContent = 'La date de départ doit être après la date d\'arrivée.'; return; }
+
+    data.nights = adNightsBetween(data.start, data.end);
 
     try {
-      await firebase.database().ref('bookedRanges').push({ start, end, note });
-      document.getElementById('ad-start').value = '';
-      document.getElementById('ad-end').value = '';
-      document.getElementById('ad-note').value = '';
+      if (_adEditingKey) {
+        await firebase.database().ref('bookedRanges/' + _adEditingKey).set(data);
+      } else {
+        await firebase.database().ref('bookedRanges').push(data);
+      }
+      adCancelEdit();
     } catch (e) {
       errEl.textContent = 'Erreur : ' + e.message;
     }
   }
 
   async function adDeleteRange(key) {
-    if (!confirm('Supprimer cette période bloquée ?')) return;
+    if (!confirm('Supprimer cette réservation ?')) return;
     await firebase.database().ref('bookedRanges/' + key).remove();
+    if (_adEditingKey === key) adCancelEdit();
   }
+
+  document.getElementById('ad-start').addEventListener('change', adUpdateNightsHint);
+  document.getElementById('ad-end').addEventListener('change', adUpdateNightsHint);
   </script>
 </body>
 </html>
