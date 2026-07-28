@@ -110,6 +110,18 @@ html { scroll-behavior: smooth; }
   .br-bento-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 110px; }
 }
 
+/* Video tour card — portrait clip, click-to-play (no preload) */
+.br-video-wrap { max-width: 320px; margin: 1.25rem auto 0; }
+.br-video-label {
+  font-size: 0.8rem; font-weight: 700; color: #0f172a;
+  display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;
+}
+.br-video-label i { color: #059669; }
+.br-video-frame {
+  border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; background: #000;
+}
+.br-video-frame video { width: 100%; display: block; }
+
 /* Lightbox */
 .br-lightbox {
   position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200;

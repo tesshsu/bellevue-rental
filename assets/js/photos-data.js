@@ -21,10 +21,14 @@ const STUDIO_PHOTOS = [
   { category: 'Chambre · Bedroom', file: 'assets/photos/chambre2.jpg', alt: 'Chambre avec lit confortable · Bedroom with comfortable bed' },
   { category: 'Chambre · Bedroom', file: 'assets/photos/chambre.jpg', alt: 'Coin bureau dans la chambre · Desk corner in the bedroom' },
   { category: 'Chambre · Bedroom', file: 'assets/photos/chambre3.jpg', alt: 'Chambre, vue côté salon · Bedroom, sofa-side view' },
+  { category: 'Chambre · Bedroom', file: 'assets/photos/chambre4.jpg', alt: 'Configuration pour 3 personnes : lit double + matelas d’appoint · 3-guest setup: double bed + extra mattress' },
+  { category: 'Chambre · Bedroom', file: 'assets/photos/chambre5.jpg', alt: 'Chambre avec lit double et lit d’appoint séparé · Bedroom with double bed and separate extra bed' },
 
   { category: 'Kitchenette', file: 'assets/photos/cusine1.jpg', alt: 'Kitchenette équipée · Equipped kitchenette' },
   { category: 'Kitchenette', file: 'assets/photos/doorside.jpg', alt: 'Couloir et accès à la kitchenette · Hallway and kitchenette entrance' },
   { category: 'Kitchenette', file: 'assets/photos/cuisine2.jpg', alt: 'Coin kitchenette avec évier et rangement · Kitchenette corner with sink and storage' },
+  { category: 'Kitchenette', file: 'assets/photos/cuisin3.jpg', alt: 'Évier, plaque de cuisson et rangements muraux · Sink, cooktop and wall storage' },
+  { category: 'Kitchenette', file: 'assets/photos/cuisin5.jpg', alt: 'Coin café, micro-ondes et réfrigérateur · Coffee corner, microwave and fridge' },
 
   { category: 'Salle de bain · Bathroom', file: 'assets/photos/salonDeBain.avif', alt: 'Salle de bain avec lavabo · Bathroom with sink' },
   { category: 'Salle de bain · Bathroom', file: 'assets/photos/saleDeBain2.avif', alt: 'Salle de bain avec douche et toilettes · Bathroom with shower and toilet' },
