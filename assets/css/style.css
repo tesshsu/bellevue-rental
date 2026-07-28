@@ -450,7 +450,8 @@ html { scroll-behavior: smooth; }
    Default (no data-lang yet, before the inline head script runs) and
    data-lang="fr" both show French only. JS in the toggle switches
    html[data-lang] and persists the choice to localStorage. */
-html:not([data-lang]) .lang-en, html:not([data-lang]) .lang-tw,
-html[data-lang="fr"] .lang-en, html[data-lang="fr"] .lang-tw { display: none; }
-html[data-lang="en"] .lang-fr, html[data-lang="en"] .lang-tw { display: none; }
-html[data-lang="tw"] .lang-fr, html[data-lang="tw"] .lang-en { display: none; }
+html:not([data-lang]) .lang-en, html:not([data-lang]) .lang-tw, html:not([data-lang]) .lang-jp,
+html[data-lang="fr"] .lang-en, html[data-lang="fr"] .lang-tw, html[data-lang="fr"] .lang-jp { display: none; }
+html[data-lang="en"] .lang-fr, html[data-lang="en"] .lang-tw, html[data-lang="en"] .lang-jp { display: none; }
+html[data-lang="tw"] .lang-fr, html[data-lang="tw"] .lang-en, html[data-lang="tw"] .lang-jp { display: none; }
+html[data-lang="jp"] .lang-fr, html[data-lang="jp"] .lang-en, html[data-lang="jp"] .lang-tw { display: none; }
