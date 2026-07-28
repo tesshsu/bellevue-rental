@@ -13,11 +13,12 @@ function brCurrentLang() {
   return document.documentElement.getAttribute('data-lang') || 'fr';
 }
 
-function brT(fr, en, tw, jp) {
+function brT(fr, en, tw, jp, kr) {
   const lang = brCurrentLang();
   if (lang === 'en') return en;
   if (lang === 'tw') return tw;
   if (lang === 'jp') return jp;
+  if (lang === 'kr') return kr;
   return fr;
 }
 

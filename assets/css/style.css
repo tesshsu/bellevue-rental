@@ -450,8 +450,9 @@ html { scroll-behavior: smooth; }
    Default (no data-lang yet, before the inline head script runs) and
    data-lang="fr" both show French only. JS in the toggle switches
    html[data-lang] and persists the choice to localStorage. */
-html:not([data-lang]) .lang-en, html:not([data-lang]) .lang-tw, html:not([data-lang]) .lang-jp,
-html[data-lang="fr"] .lang-en, html[data-lang="fr"] .lang-tw, html[data-lang="fr"] .lang-jp { display: none; }
-html[data-lang="en"] .lang-fr, html[data-lang="en"] .lang-tw, html[data-lang="en"] .lang-jp { display: none; }
-html[data-lang="tw"] .lang-fr, html[data-lang="tw"] .lang-en, html[data-lang="tw"] .lang-jp { display: none; }
-html[data-lang="jp"] .lang-fr, html[data-lang="jp"] .lang-en, html[data-lang="jp"] .lang-tw { display: none; }
+html:not([data-lang]) .lang-en, html:not([data-lang]) .lang-tw, html:not([data-lang]) .lang-jp, html:not([data-lang]) .lang-kr,
+html[data-lang="fr"] .lang-en, html[data-lang="fr"] .lang-tw, html[data-lang="fr"] .lang-jp, html[data-lang="fr"] .lang-kr { display: none; }
+html[data-lang="en"] .lang-fr, html[data-lang="en"] .lang-tw, html[data-lang="en"] .lang-jp, html[data-lang="en"] .lang-kr { display: none; }
+html[data-lang="tw"] .lang-fr, html[data-lang="tw"] .lang-en, html[data-lang="tw"] .lang-jp, html[data-lang="tw"] .lang-kr { display: none; }
+html[data-lang="jp"] .lang-fr, html[data-lang="jp"] .lang-en, html[data-lang="jp"] .lang-tw, html[data-lang="jp"] .lang-kr { display: none; }
+html[data-lang="kr"] .lang-fr, html[data-lang="kr"] .lang-en, html[data-lang="kr"] .lang-tw, html[data-lang="kr"] .lang-jp { display: none; }

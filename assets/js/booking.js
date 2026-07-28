@@ -135,9 +135,9 @@ function brNightsBetween(startIso, endIso) {
   return Math.round(ms / 86400000);
 }
 
-function brT_(fr, en, tw, jp) {
+function brT_(fr, en, tw, jp, kr) {
   // Falls back to French if ui.js hasn't loaded yet for some reason.
-  return typeof brT === 'function' ? brT(fr, en, tw, jp) : fr;
+  return typeof brT === 'function' ? brT(fr, en, tw, jp, kr) : fr;
 }
 
 const BR_CANCELLATION_FREE_DAYS = 5; // free cancellation up to this many days before check-in
@@ -150,20 +150,22 @@ function brUpdatePolicyBadge(startIso) {
       `Annulation gratuite jusqu'à ${BR_CANCELLATION_FREE_DAYS} jours avant l'arrivée`,
       `Free cancellation up to ${BR_CANCELLATION_FREE_DAYS} days before check-in`,
       `入住前${BR_CANCELLATION_FREE_DAYS}天可免費取消`,
-      `チェックイン${BR_CANCELLATION_FREE_DAYS}日前まで無料キャンセル可能`
+      `チェックイン${BR_CANCELLATION_FREE_DAYS}日前まで無料キャンセル可能`,
+      `체크인 ${BR_CANCELLATION_FREE_DAYS}일 전까지 무료 취소 가능`
     );
     return;
   }
   const deadline = new Date(startIso + 'T00:00:00');
   deadline.setDate(deadline.getDate() - BR_CANCELLATION_FREE_DAYS);
   const lang = typeof brCurrentLang === 'function' ? brCurrentLang() : 'fr';
-  const locale = lang === 'en' ? 'en-GB' : lang === 'tw' ? 'zh-TW' : lang === 'jp' ? 'ja-JP' : 'fr-FR';
+  const locale = lang === 'en' ? 'en-GB' : lang === 'tw' ? 'zh-TW' : lang === 'jp' ? 'ja-JP' : lang === 'kr' ? 'ko-KR' : 'fr-FR';
   const dateStr = deadline.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
   el.textContent = brT_(
     `Annulation gratuite jusqu'au ${dateStr}`,
     `Free cancellation until ${dateStr}`,
     `${dateStr} 前可免費取消`,
-    `${dateStr} まで無料キャンセル可能`
+    `${dateStr} まで無料キャンセル可能`,
+    `${dateStr}까지 무료 취소 가능`
   );
 }
 
@@ -197,7 +199,7 @@ function brRecomputeSummary() {
 
   if (nights <= 0) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_("La date de départ doit être après la date d'arrivée", 'Check-out must be after check-in', '退房日期必須晚於入住日期', 'チェックアウト日はチェックイン日より後にしてください')}</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_("La date de départ doit être après la date d'arrivée", 'Check-out must be after check-in', '退房日期必須晚於入住日期', 'チェックアウト日はチェックイン日より後にしてください', '체크아웃 날짜는 체크인 날짜보다 뒤여야 합니다')}</span>`;
     submitBtn.disabled = true;
     brSetPolicyLock(false);
     return;
@@ -205,7 +207,7 @@ function brRecomputeSummary() {
 
   if (nights < BR_MIN_NIGHTS) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_(`Séjour minimum : ${BR_MIN_NIGHTS} nuit(s)`, `${BR_MIN_NIGHTS}-night minimum stay`, `最少需入住${BR_MIN_NIGHTS}晚`, `最低${BR_MIN_NIGHTS}泊から`)}</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_(`Séjour minimum : ${BR_MIN_NIGHTS} nuit(s)`, `${BR_MIN_NIGHTS}-night minimum stay`, `最少需入住${BR_MIN_NIGHTS}晚`, `最低${BR_MIN_NIGHTS}泊から`, `최소 ${BR_MIN_NIGHTS}박부터 예약 가능합니다`)}</span>`;
     submitBtn.disabled = true;
     brSetPolicyLock(false);
     return;
@@ -213,7 +215,7 @@ function brRecomputeSummary() {
 
   if (typeof brRangeHasConflict === 'function' && brRangeHasConflict(startIso, endIso)) {
     summaryEl.classList.add('br-invalid');
-    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_('Une ou plusieurs de ces dates sont déjà réservées', 'One or more of these dates are already booked', '部分日期已被預訂', 'この期間の一部はすでに予約済みです')}</span>`;
+    summaryEl.innerHTML = `<span class="br-price-summary-line"><i class="fas fa-exclamation-triangle"></i> ${brT_('Une ou plusieurs de ces dates sont déjà réservées', 'One or more of these dates are already booked', '部分日期已被預訂', 'この期間の一部はすでに予約済みです', '선택하신 날짜 중 일부는 이미 예약되어 있습니다')}</span>`;
     submitBtn.disabled = true;
     brSetPolicyLock(false);
     return;
@@ -221,10 +223,10 @@ function brRecomputeSummary() {
 
   const total = brComputeStayPrice(nights);
   summaryEl.classList.remove('br-invalid');
-  const nightsLabel = brT_(`${nights} nuit${nights > 1 ? 's' : ''}`, `${nights} night${nights > 1 ? 's' : ''}`, `${nights} 晚`, `${nights} 泊`);
+  const nightsLabel = brT_(`${nights} nuit${nights > 1 ? 's' : ''}`, `${nights} night${nights > 1 ? 's' : ''}`, `${nights} 晚`, `${nights} 泊`, `${nights}박`);
   summaryEl.innerHTML = `
     <span class="br-price-summary-line">${nightsLabel}</span>
-    <span class="br-price-summary-total">${brT_('Total', 'Total', '總計', '合計')} : €${total}</span>`;
+    <span class="br-price-summary-total">${brT_('Total', 'Total', '總計', '合計', '총액')} : €${total}</span>`;
   // Dates are valid, so the button stays clickable — it only "soft locks"
   // on the policy checkbox, with a hint and a shake on attempted submit
   // (see brSubmitBooking), instead of a silently disabled button.
@@ -239,11 +241,11 @@ function brUpdateCalHint(startIso, endIso) {
   const hint = document.getElementById('br-cal-hint');
   if (!hint) return;
   if (!startIso) {
-    hint.innerHTML = `<span class="lang-fr">👉 Cliquez une date pour commencer</span><span class="lang-en">👉 Click a date to start</span><span class="lang-tw">👉 請點選日期開始</span><span class="lang-jp">👉 まずは日付を選択してください</span>`;
+    hint.innerHTML = `<span class="lang-fr">👉 Cliquez une date pour commencer</span><span class="lang-en">👉 Click a date to start</span><span class="lang-tw">👉 請點選日期開始</span><span class="lang-jp">👉 まずは日付を選択してください</span><span class="lang-kr">👉 날짜를 선택해 시작하세요</span>`;
   } else if (!endIso) {
-    hint.innerHTML = `<span class="lang-fr">✅ Arrivée sélectionnée — choisissez maintenant votre date de départ</span><span class="lang-en">✅ Check-in set — now choose your check-out date</span><span class="lang-tw">✅ 已選擇入住日期，請選擇退房日期</span><span class="lang-jp">✅ チェックイン日を選択しました — 次にチェックアウト日を選んでください</span>`;
+    hint.innerHTML = `<span class="lang-fr">✅ Arrivée sélectionnée — choisissez maintenant votre date de départ</span><span class="lang-en">✅ Check-in set — now choose your check-out date</span><span class="lang-tw">✅ 已選擇入住日期，請選擇退房日期</span><span class="lang-jp">✅ チェックイン日を選択しました — 次にチェックアウト日を選んでください</span><span class="lang-kr">✅ 체크인 날짜를 선택했습니다 — 이제 체크아웃 날짜를 선택해 주세요</span>`;
   } else {
-    hint.innerHTML = `<span class="lang-fr">🎉 Séjour sélectionné — vérifiez le prix ci-dessous</span><span class="lang-en">🎉 Stay selected — check the price below</span><span class="lang-tw">🎉 已選擇入住區間，請至下方確認價格</span><span class="lang-jp">🎉 宿泊期間を選択しました — 下記の料金をご確認ください</span>`;
+    hint.innerHTML = `<span class="lang-fr">🎉 Séjour sélectionné — vérifiez le prix ci-dessous</span><span class="lang-en">🎉 Stay selected — check the price below</span><span class="lang-tw">🎉 已選擇入住區間，請至下方確認價格</span><span class="lang-jp">🎉 宿泊期間を選択しました — 下記の料金をご確認ください</span><span class="lang-kr">🎉 숙박 기간을 선택했습니다 — 아래에서 요금을 확인해 주세요</span>`;
   }
 }
 
@@ -295,7 +297,8 @@ function brShowSuccessScreen(guestName) {
     <span class="lang-fr">${name ? `Merci ${name} ! ` : 'Merci ! '}Votre demande de réservation pour le Studio Bellevue a bien été transmise. Nous vous répondrons par e-mail dans les plus brefs délais.</span>
     <span class="lang-en">${name ? `Thank you, ${name}! ` : 'Thank you! '}Your booking request for Studio Bellevue has been successfully transmitted. We will reply to your email shortly.</span>
     <span class="lang-tw">${name ? `感謝您，${name}！` : '感謝您！'}您的 Studio Bellevue 預訂申請已成功送出，我們將盡快以電子郵件回覆您。</span>
-    <span class="lang-jp">${name ? `${name}様、` : ''}ありがとうございます！Studio Bellevueへのご予約リクエストを承りました。追ってメールにてご連絡いたします。</span>`;
+    <span class="lang-jp">${name ? `${name}様、` : ''}ありがとうございます！Studio Bellevueへのご予約リクエストを承りました。追ってメールにてご連絡いたします。</span>
+    <span class="lang-kr">${name ? `${name}님, ` : ''}감사합니다! Studio Bellevue 예약 신청이 성공적으로 접수되었습니다. 빠른 시일 내에 이메일로 답변드리겠습니다.</span>`;
 
   fields.hidden = true;
   screen.hidden = false;
@@ -328,7 +331,7 @@ async function brSubmitBooking(evt) {
 
   btn.disabled = true;
   const originalLabel = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + brT_('Envoi en cours…', 'Sending…', '傳送中…', '送信中…');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + brT_('Envoi en cours…', 'Sending…', '傳送中…', '送信中…', '전송 중…');
 
   try {
     const res = await fetch(form.action, {
@@ -358,7 +361,7 @@ function brRebuildGuestSelect() {
   if (!guestSelect) return;
   const prevValue = guestSelect.value;
   guestSelect.innerHTML = Array.from({ length: BR_MAX_GUESTS }, (_, i) => i + 1)
-    .map(n => `<option value="${n}">${n} ${brT_(n > 1 ? 'personnes' : 'personne', n > 1 ? 'guests' : 'guest', '人', '名')}</option>`).join('');
+    .map(n => `<option value="${n}">${n} ${brT_(n > 1 ? 'personnes' : 'personne', n > 1 ? 'guests' : 'guest', '人', '名', '명')}</option>`).join('');
   if (prevValue) guestSelect.value = prevValue;
 }
 
@@ -369,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('br-min-nights-display').textContent = BR_MIN_NIGHTS;
   document.getElementById('br-max-guests-display').textContent = BR_MAX_GUESTS;
   document.getElementById('br-quickfact-guests').innerHTML =
-    `<span class="lang-fr">1-${BR_MAX_GUESTS} pers.</span><span class="lang-en">1-${BR_MAX_GUESTS} guests</span><span class="lang-tw">1-${BR_MAX_GUESTS}人</span><span class="lang-jp">1〜${BR_MAX_GUESTS}名</span>`;
+    `<span class="lang-fr">1-${BR_MAX_GUESTS} pers.</span><span class="lang-en">1-${BR_MAX_GUESTS} guests</span><span class="lang-tw">1-${BR_MAX_GUESTS}人</span><span class="lang-jp">1〜${BR_MAX_GUESTS}名</span><span class="lang-kr">1~${BR_MAX_GUESTS}명</span>`;
 
   brRebuildGuestSelect();
   document.addEventListener('br:langchange', () => {
