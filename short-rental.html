@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Quittance courte durée — Studio Bellevue</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧾</text></svg>">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+
+<style>
+  .sr-head { background: linear-gradient(160deg,#1a4a3a 0%,#0f3d2e 100%); color: #fff; }
+  .sr-head-inner { max-width: 900px; margin: 0 auto; padding: 1.75rem 1.5rem 1.5rem; }
+  .sr-head a { color: #86efac; text-decoration: none; font-size: 0.8rem; font-weight: 700; }
+  .sr-head h1 { font-size: 1.6rem; font-weight: 800; margin-top: 0.4rem; }
+  .sr-head p { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+
+  .sr-wrap { max-width: 900px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+  .sr-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; }
+  .sr-card-title { font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .sr-card-title i { color: #059669; }
+  .sr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+  .sr-grid .sr-full { grid-column: 1 / -1; }
+  @media (max-width: 640px) { .sr-grid { grid-template-columns: 1fr; } .sr-grid .sr-full { grid-column: 1; } }
+
+  .sr-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 0.3rem; }
+  .sr-label small { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.7; }
+  .sr-input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff; }
+  .sr-input:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
+  .sr-suffix { position: relative; }
+  .sr-suffix .sr-input { padding-right: 3.6rem; }
+  .sr-suffix span { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.78rem; color: #64748b; font-weight: 600; }
+  .sr-hint { font-size: 0.75rem; color: #64748b; margin-top: 0.35rem; }
+  .sr-hint.ok { color: #059669; font-weight: 700; }
+  .sr-hint.err { color: #dc2626; font-weight: 700; }
+  .sr-note { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; border-radius: 10px; padding: 0.75rem 0.9rem; font-size: 0.78rem; margin-bottom: 1rem; }
+
+  .sr-seg { display: inline-flex; background: #f1f5f9; border-radius: 8px; padding: 0.2rem; }
+  .sr-seg button { border: none; background: none; padding: 0.45rem 0.9rem; font-size: 0.8rem; font-weight: 700; color: #475569; border-radius: 6px; cursor: pointer; }
+  .sr-seg button.active { background: #fff; color: #0f3d2e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+  .sr-table-wrap { overflow-x: auto; }
+  .sr-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .sr-table th { text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; padding: 0.5rem 0.6rem; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+  .sr-table td { padding: 0.55rem 0.6rem; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+  .sr-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sr-table tfoot td { font-weight: 800; border-top: 2px solid #e2e8f0; border-bottom: none; }
+
+  .sr-btn { padding: 0.65rem 1.4rem; border-radius: 8px; border: none; background: #059669; color: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; }
+  .sr-btn:hover { background: #047857; }
+  .sr-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  /* ── Quittance document ─────────────────────────────────────── */
+  .sr-doc { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2.25rem 2.5rem; margin-bottom: 1.5rem; color: #0f172a; font-size: 0.86rem; line-height: 1.55; }
+  @media (max-width: 640px) { .sr-doc { padding: 1.5rem 1.1rem; } }
+  .sr-doc h2 { text-align: center; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+  .sr-doc .sr-doc-sub { text-align: center; font-size: 0.8rem; color: #475569; margin-bottom: 1.5rem; }
+  .sr-doc-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+  @media (max-width: 640px) { .sr-doc-parties { grid-template-columns: 1fr; } }
+  .sr-doc-parties div { border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem 0.9rem; }
+  .sr-doc-parties b { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.2rem; }
+  .sr-doc .sr-table { margin: 1rem 0; }
+  .sr-doc-total { font-size: 1rem; font-weight: 800; }
+  .sr-doc-legal { font-size: 0.72rem; color: #64748b; margin-top: 1.25rem; }
+  .sr-doc-sign { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-top: 1.75rem; flex-wrap: wrap; }
+  .sr-doc-sign .sr-sign-box { width: 220px; height: 80px; border-bottom: 1px solid #94a3b8; font-size: 0.72rem; color: #64748b; }
+
+  @media print {
+    body { background: #fff !important; }
+    .no-print { display: none !important; }
+    .sr-wrap { padding: 0; max-width: none; }
+    .sr-doc { border: none; border-radius: 0; padding: 0; margin: 0; page-break-after: always; break-after: page; }
+    .sr-doc:last-child { page-break-after: auto; break-after: auto; }
+  }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <header class="sr-head no-print">
+    <div class="sr-head-inner">
+      <a href="index.html"><i class="fas fa-arrow-left"></i> Studio Bellevue</a>
+      <h1>Quittance courte durée</h1>
+      <p>Loyer au prorata des jours + électricité au relevé du compteur, mois par mois.</p>
+    </div>
+  </header>
+
+  <main class="sr-wrap">
+
+    <!-- ── PARTIES ───────────────────────────────────────────── -->
+    <section class="sr-card no-print">
+      <div class="sr-card-title"><i class="fas fa-user-group"></i> Bailleur &amp; locataire</div>
+      <div class="sr-grid">
+        <div>
+          <label class="sr-label" for="sr-landlord">Bailleur</label>
+          <input class="sr-input" id="sr-landlord" placeholder="Nom du bailleur">
+        </div>
+        <div>
+          <label class="sr-label" for="sr-tenant">Locataire</label>
+          <input class="sr-input" id="sr-tenant" placeholder="Nom du locataire">
+        </div>
+        <div class="sr-full">
+          <label class="sr-label" for="sr-address">Adresse du logement loué</label>
+          <input class="sr-input" id="sr-address" value="Studio Bellevue, 13 Allée Bellevue, 06460 Saint-Vallier-de-Thiey">
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SÉJOUR & LOYER ────────────────────────────────────── -->
+    <section class="sr-card no-print">
+      <div class="sr-card-title"><i class="fas fa-calendar-days"></i> Séjour &amp; loyer</div>
+      <div class="sr-grid">
+        <div>
+          <label class="sr-label" for="sr-start">Date d'entrée</label>
+          <input class="sr-input" type="date" id="sr-start">
+        </div>
+        <div>
+          <label class="sr-label" for="sr-end">Date de sortie</label>
+          <input class="sr-input" type="date" id="sr-end">
+        </div>
+        <div>
+          <label class="sr-label" for="sr-rent">Loyer mensuel</label>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-rent" min="0" step="1" value="300"><span>€ / mois</span></div>
+        </div>
+        <div>
+          <label class="sr-label" for="sr-paid">Date de paiement</label>
+          <input class="sr-input" type="date" id="sr-paid">
+        </div>
+        <div class="sr-full"><div class="sr-hint" id="sr-stay-hint"></div></div>
+      </div>
+    </section>
+
+    <!-- ── ÉLECTRICITÉ ───────────────────────────────────────── -->
+    <section class="sr-card no-print">
+      <div class="sr-card-title"><i class="fas fa-bolt"></i> Électricité</div>
+      <div class="sr-note">
+        <i class="fas fa-circle-info"></i>
+        Par défaut <b>0,20 €/kWh</b> (environ le Tarif Bleu EDF, option Base). Remplacez-le par le <b>prix du kWh TTC</b>
+        de votre facture EDF (ligne « Consommation ») dès que vous l'avez.
+      </div>
+      <div class="sr-grid">
+        <div>
+          <label class="sr-label" for="sr-idx-in">Index compteur à l'entrée</label>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-idx-in" min="0" step="1" placeholder="ex. 12450"><span>kWh</span></div>
+        </div>
+        <div>
+          <label class="sr-label" for="sr-idx-out">Index compteur à la sortie</label>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-idx-out" min="0" step="1" placeholder="ex. 12630"><span>kWh</span></div>
+        </div>
+        <div>
+          <label class="sr-label" for="sr-kwh-price">Prix du kWh TTC</label>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-kwh-price" min="0" step="0.0001" value="0.20"><span>€ / kWh</span></div>
+        </div>
+        <div>
+          <label class="sr-label" for="sr-sub">Abonnement électricité <small>(facultatif)</small></label>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-sub" min="0" step="0.01" value="0"><span>€ / mois</span></div>
+          <div class="sr-hint">Part de l'abonnement EDF refacturée, au prorata des jours. Laissez 0 pour ne pas l'inclure.</div>
+        </div>
+        <div class="sr-full"><div class="sr-hint" id="sr-elec-hint"></div></div>
+      </div>
+    </section>
+
+    <!-- ── RÉCAPITULATIF ─────────────────────────────────────── -->
+    <section class="sr-card no-print">
+      <div class="sr-card-title"><i class="fas fa-table-list"></i> Récapitulatif mensuel</div>
+      <div class="sr-table-wrap" id="sr-summary"><p class="sr-hint">Renseignez les dates d'entrée et de sortie.</p></div>
+      <div class="flex flex-wrap items-center gap-3 mt-5">
+        <div class="sr-seg" id="sr-mode">
+          <button type="button" data-mode="monthly" class="active">Une quittance par mois</button>
+          <button type="button" data-mode="single">Une quittance globale</button>
+        </div>
+        <button type="button" class="sr-btn" id="sr-print" disabled><i class="fas fa-print"></i> Imprimer / PDF</button>
+      </div>
+    </section>
+
+    <!-- ── QUITTANCES (preview + print) ──────────────────────── -->
+    <div id="sr-docs"></div>
+
+  </main>
+
+<script>
+// ── Quittance courte durée ──────────────────────────────────────
+// Rent: monthly rent × nights in that month ÷ days in that month
+// (a full month is billed at the full rent). Nights = exit day not
+// counted. Electricity: (exit index − entry index) × kWh price, split
+// across months in proportion to nights, since only two readings exist.
+
+const $ = id => document.getElementById(id);
+const FIELDS = ['sr-landlord','sr-tenant','sr-address','sr-start','sr-end','sr-rent','sr-paid','sr-idx-in','sr-idx-out','sr-kwh-price','sr-sub'];
+const STORE_KEY = 'br_short_rental';
+const DAY = 86400000;
+const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+let mode = 'monthly';
+
+const eur = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+const kwh = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' kWh';
+const round2 = n => Math.round(n * 100) / 100;
+const num = id => parseFloat($(id).value);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+function parseDate(v) {
+  if (!v) return null;
+  const [y, m, d] = v.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+const fmtDate = d => d.toLocaleDateString('fr-FR', { timeZone: 'UTC' });
+const isoToday = () => new Date().toISOString().slice(0, 10);
+
+// ── Amount in words (French), needed on a quittance ───────────────
+const UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+const TENS = ['','','vingt','trente','quarante','cinquante','soixante'];
+function below100(n) {
+  if (n < 17) return UNITS[n];
+  if (n < 20) return 'dix-' + UNITS[n - 10];
+  const t = Math.floor(n / 10), u = n % 10;
+  if (t === 7) return u === 1 ? 'soixante et onze' : 'soixante-' + below100(10 + u);
+  if (t === 8) return u === 0 ? 'quatre-vingts' : 'quatre-vingt-' + UNITS[u];
+  if (t === 9) return 'quatre-vingt-' + below100(10 + u);
+  return TENS[t] + (u === 0 ? '' : u === 1 ? ' et un' : '-' + UNITS[u]);
+}
+function below1000(n, final) {
+  const h = Math.floor(n / 100), r = n % 100;
+  let s = h === 0 ? '' : h === 1 ? 'cent' : UNITS[h] + ' cent' + (r === 0 && final ? 's' : '');
+  if (r) s += (s ? ' ' : '') + (r === 80 && !final ? 'quatre-vingt' : below100(r));
+  return s;
+}
+function intWords(n) {
+  if (n === 0) return 'zéro';
+  const th = Math.floor(n / 1000), r = n % 1000;
+  const parts = [];
+  if (th) parts.push(th === 1 ? 'mille' : below1000(th, false) + ' mille');
+  if (r) parts.push(below1000(r, true));
+  return parts.join(' ');
+}
+function amountWords(x) {
+  const cents = Math.round(x * 100), e = Math.floor(cents / 100), c = cents % 100;
+  let s = intWords(e) + (e > 1 ? ' euros' : ' euro');
+  if (c) s += ' et ' + intWords(c) + (c > 1 ? ' centimes' : ' centime');
+  return s;
+}
+
+// ── Split the stay into calendar months ───────────────────────────
+function computeMonths(start, end, rent, elecTotal, kwhTotal, sub) {
+  const totalNights = (end - start) / DAY;
+  const rows = [];
+  let cur = start;
+  while (cur < end) {
+    const y = cur.getUTCFullYear(), m = cur.getUTCMonth();
+    const next = new Date(Date.UTC(y, m + 1, 1));
+    const segEnd = next < end ? next : end;
+    const nights = (segEnd - cur) / DAY;
+    const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const full = nights === daysInMonth;
+    rows.push({
+      label: MONTHS[m] + ' ' + y,
+      from: cur,
+      // intermediate months end on their last day; the final one ends on the exit date
+      to: segEnd === end ? end : new Date(next - DAY),
+      nights, daysInMonth, full,
+      rent: full ? round2(rent) : round2(rent * nights / daysInMonth),
+      sub: full ? round2(sub) : round2(sub * nights / daysInMonth),
+      kwh: kwhTotal * nights / totalNights,
+      elec: round2(elecTotal * nights / totalNights),
+    });
+    cur = segEnd;
+  }
+  // absorb rounding cents in the last month so the months add up to the total
+  if (rows.length) {
+    const drift = round2(elecTotal - rows.reduce((a, r) => a + r.elec, 0));
+    rows[rows.length - 1].elec = round2(rows[rows.length - 1].elec + drift);
+  }
+  rows.forEach(r => r.total = round2(r.rent + r.sub + r.elec));
+  return rows;
+}
+
+function sumRows(rows) {
+  return rows.reduce((a, r) => ({
+    nights: a.nights + r.nights, rent: round2(a.rent + r.rent), sub: round2(a.sub + r.sub),
+    kwh: a.kwh + r.kwh, elec: round2(a.elec + r.elec), total: round2(a.total + r.total),
+  }), { nights: 0, rent: 0, sub: 0, kwh: 0, elec: 0, total: 0 });
+}
+
+function tableHTML(rows, showSub, withTotal) {
+  const head = `<tr><th>Mois</th><th>Période</th><th class="num">Nuits</th><th class="num">Loyer</th>
+    <th class="num">Électricité</th>${showSub ? '<th class="num">Abonnement</th>' : ''}<th class="num">Total</th></tr>`;
+  const body = rows.map(r => `<tr>
+    <td style="text-transform:capitalize">${r.label}</td>
+    <td>${fmtDate(r.from)} → ${fmtDate(r.to)}</td>
+    <td class="num">${r.nights}${r.full ? '' : ' / ' + r.daysInMonth}</td>
+    <td class="num">${eur(r.rent)}</td>
+    <td class="num">${eur(r.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(r.kwh)}</span></td>
+    ${showSub ? `<td class="num">${eur(r.sub)}</td>` : ''}
+    <td class="num"><b>${eur(r.total)}</b></td></tr>`).join('');
+  let foot = '';
+  if (withTotal) {
+    const t = sumRows(rows);
+    foot = `<tfoot><tr><td colspan="2">Total séjour</td><td class="num">${t.nights}</td><td class="num">${eur(t.rent)}</td>
+      <td class="num">${eur(t.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(t.kwh)}</span></td>
+      ${showSub ? `<td class="num">${eur(t.sub)}</td>` : ''}<td class="num">${eur(t.total)}</td></tr></tfoot>`;
+  }
+  return `<table class="sr-table"><thead>${head}</thead><tbody>${body}</tbody>${foot}</table>`;
+}
+
+function quittanceHTML(rows, ctx, number) {
+  const t = sumRows(rows);
+  const from = rows[0].from, to = rows[rows.length - 1].to;
+  const title = rows.length === 1 ? 'Période de ' + rows[0].label : 'Séjour du ' + fmtDate(from) + ' au ' + fmtDate(to);
+  return `<article class="sr-doc">
+    <h2>Quittance de loyer</h2>
+    <div class="sr-doc-sub">N° ${number} · ${title}</div>
+    <div class="sr-doc-parties">
+      <div><b>Bailleur</b>${esc(ctx.landlord || '—')}</div>
+      <div><b>Locataire</b>${esc(ctx.tenant || '—')}</div>
+    </div>
+    <p><b>Logement loué :</b> ${esc(ctx.address)}</p>
+    <p style="margin-top:0.9rem">
+      Je soussigné(e) <b>${esc(ctx.landlord || '…………………')}</b>, bailleur du logement désigné ci-dessus,
+      déclare avoir reçu de <b>${esc(ctx.tenant || '…………………')}</b> la somme de <b>${eur(t.total)}</b>
+      (<i>${amountWords(t.total)}</i>), au titre du loyer et des charges d'électricité pour la période
+      du <b>${fmtDate(from)}</b> au <b>${fmtDate(to)}</b>, et lui en donne quittance, sous réserve de tous mes droits.
+    </p>
+    <div class="sr-table-wrap">${tableHTML(rows, ctx.sub > 0, rows.length > 1)}</div>
+    <p style="font-size:0.78rem;color:#475569">
+      Électricité : index d'entrée ${ctx.idxIn.toLocaleString('fr-FR')} kWh → index de sortie ${ctx.idxOut.toLocaleString('fr-FR')} kWh,
+      soit ${kwh(ctx.kwhTotal)} au prix de ${ctx.price.toLocaleString('fr-FR', { maximumFractionDigits: 4 })} € TTC/kWh,
+      répartis au prorata des nuits.${rows.some(r => !r.full) ? ' Loyer mensuel de ' + eur(ctx.rent) + ' calculé au prorata des nuits pour les mois incomplets.' : ''}
+    </p>
+    <p class="sr-doc-total" style="margin-top:0.75rem">Total payé : ${eur(t.total)}</p>
+    <div class="sr-doc-sign">
+      <div>Fait à Saint-Vallier-de-Thiey, le ${ctx.paid ? fmtDate(ctx.paid) : '……………'}</div>
+      <div class="sr-sign-box">Signature du bailleur</div>
+    </div>
+    <p class="sr-doc-legal">
+      Le paiement de la présente quittance n'emporte pas présomption de paiement des termes antérieurs.
+      Cette quittance annule tous les reçus qui auraient pu être donnés pour acompte versé sur la période indiquée.
+    </p>
+  </article>`;
+}
+
+function render() {
+  save();
+  const start = parseDate($('sr-start').value), end = parseDate($('sr-end').value);
+  const stayHint = $('sr-stay-hint'), elecHint = $('sr-elec-hint');
+  const summary = $('sr-summary'), docs = $('sr-docs'), printBtn = $('sr-print');
+  docs.innerHTML = ''; printBtn.disabled = true;
+
+  if (!start || !end) {
+    stayHint.className = 'sr-hint'; stayHint.textContent = '';
+    summary.innerHTML = '<p class="sr-hint">Renseignez les dates d\'entrée et de sortie.</p>';
+    return;
+  }
+  if (end <= start) {
+    stayHint.className = 'sr-hint err'; stayHint.textContent = 'La date de sortie doit être après la date d\'entrée.';
+    summary.innerHTML = '';
+    return;
+  }
+  const nights = (end - start) / DAY;
+  stayHint.className = 'sr-hint ok'; stayHint.textContent = nights + (nights > 1 ? ' nuits' : ' nuit');
+
+  const idxIn = num('sr-idx-in'), idxOut = num('sr-idx-out');
+  const price = num('sr-kwh-price') || 0, rent = num('sr-rent') || 0, sub = num('sr-sub') || 0;
+  let kwhTotal = 0;
+  if (!isNaN(idxIn) && !isNaN(idxOut)) {
+    if (idxOut < idxIn) {
+      elecHint.className = 'sr-hint err'; elecHint.textContent = 'L\'index de sortie doit être supérieur ou égal à l\'index d\'entrée.';
+      summary.innerHTML = '';
+      return;
+    }
+    kwhTotal = idxOut - idxIn;
+    elecHint.className = 'sr-hint ok';
+    elecHint.textContent = `Consommation : ${kwh(kwhTotal)} × ${price.toLocaleString('fr-FR', { maximumFractionDigits: 4 })} € = ${eur(round2(kwhTotal * price))}`;
+  } else {
+    elecHint.className = 'sr-hint'; elecHint.textContent = 'Saisissez les deux index pour calculer l\'électricité.';
+  }
+
+  const elecTotal = round2(kwhTotal * price);
+  const rows = computeMonths(start, end, rent, elecTotal, kwhTotal, sub);
+  summary.innerHTML = tableHTML(rows, sub > 0, true);
+
+  const ctx = {
+    landlord: $('sr-landlord').value.trim(), tenant: $('sr-tenant').value.trim(), address: $('sr-address').value.trim(),
+    paid: parseDate($('sr-paid').value), idxIn: idxIn || 0, idxOut: idxOut || 0, kwhTotal, price, rent, sub,
+  };
+  const base = $('sr-start').value.replace(/-/g, '');
+  docs.innerHTML = mode === 'single'
+    ? quittanceHTML(rows, ctx, base)
+    : rows.map((r, i) => quittanceHTML([r], ctx, base + '-' + (i + 1))).join('');
+  printBtn.disabled = false;
+}
+
+// ── Remember the last entries in this browser (convenience only) ──
+function save() {
+  try {
+    const data = { mode };
+    FIELDS.forEach(id => data[id] = $(id).value);
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  } catch (e) {}
+}
+function load() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (!data) return;
+    FIELDS.forEach(id => { if (data[id] != null && data[id] !== '') $(id).value = data[id]; });
+    if (data.mode) mode = data.mode;
+  } catch (e) {}
+}
+
+load();
+if (!$('sr-paid').value) $('sr-paid').value = isoToday();
+document.querySelectorAll('#sr-mode button').forEach(btn => {
+  btn.classList.toggle('active', btn.dataset.mode === mode);
+  btn.addEventListener('click', () => {
+    mode = btn.dataset.mode;
+    document.querySelectorAll('#sr-mode button').forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+});
+FIELDS.forEach(id => $(id).addEventListener('input', render));
+$('sr-print').addEventListener('click', () => window.print());
+render();
+</script>
+</body>
+</html>
