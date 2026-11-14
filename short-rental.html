@@ -137,7 +137,7 @@
       <div class="sr-card-title"><i class="fas fa-bolt"></i> Électricité</div>
       <div class="sr-note">
         <i class="fas fa-circle-info"></i>
-        Par défaut <b>0,20 €/kWh</b> (environ le Tarif Bleu EDF, option Base). Remplacez-le par le <b>prix du kWh TTC</b>
+        Coût moyen global : environ <b>0,277 € TTC / kWh</b>. Remplacez-le par le <b>prix du kWh TTC</b>
         de votre facture EDF (ligne « Consommation ») dès que vous l'avez.
       </div>
       <div class="sr-grid">
@@ -151,7 +151,7 @@
         </div>
         <div>
           <label class="sr-label" for="sr-kwh-price">Prix du kWh TTC</label>
-          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-kwh-price" min="0" step="0.0001" value="0.20"><span>€ / kWh</span></div>
+          <div class="sr-suffix"><input class="sr-input" type="number" id="sr-kwh-price" min="0" step="0.0001" value="0.277"><span>€ / kWh</span></div>
         </div>
         <div>
           <label class="sr-label" for="sr-sub">Abonnement électricité <small>(facultatif)</small></label>
@@ -402,6 +402,7 @@ function load() {
   try {
     const data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (!data) return;
+    if (data['sr-kwh-price'] === '0.20' || data['sr-kwh-price'] === '0.228') data['sr-kwh-price'] = '0.277';
     FIELDS.forEach(id => { if (data[id] != null && data[id] !== '') $(id).value = data[id]; });
     if (data.mode) mode = data.mode;
   } catch (e) {}
