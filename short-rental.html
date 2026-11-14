@@ -146,7 +146,7 @@
           <div class="sr-suffix"><input class="sr-input" type="number" id="sr-idx-in" min="0" step="1" placeholder="ex. 12450"><span>kWh</span></div>
         </div>
         <div>
-          <label class="sr-label" for="sr-idx-out">Index compteur à la sortie</label>
+          <label class="sr-label" for="sr-idx-out">Index compteur à la sortie <small>(facultatif, à renseigner au départ)</small></label>
           <div class="sr-suffix"><input class="sr-input" type="number" id="sr-idx-out" min="0" step="1" placeholder="ex. 12630"><span>kWh</span></div>
         </div>
         <div>
@@ -242,7 +242,7 @@ function amountWords(x) {
 }
 
 // ── Split the stay into calendar months ───────────────────────────
-function computeMonths(start, end, rent, elecTotal, kwhTotal, sub) {
+function computeMonths(start, end, rent, elecTotal, kwhTotal, sub, electricityPending) {
   const totalNights = (end - start) / DAY;
   const rows = [];
   let cur = start;
@@ -263,6 +263,7 @@ function computeMonths(start, end, rent, elecTotal, kwhTotal, sub) {
       sub: full ? round2(sub) : round2(sub * nights / daysInMonth),
       kwh: kwhTotal * nights / totalNights,
       elec: round2(elecTotal * nights / totalNights),
+      electricityPending,
     });
     cur = segEnd;
   }
@@ -279,7 +280,8 @@ function sumRows(rows) {
   return rows.reduce((a, r) => ({
     nights: a.nights + r.nights, rent: round2(a.rent + r.rent), sub: round2(a.sub + r.sub),
     kwh: a.kwh + r.kwh, elec: round2(a.elec + r.elec), total: round2(a.total + r.total),
-  }), { nights: 0, rent: 0, sub: 0, kwh: 0, elec: 0, total: 0 });
+    electricityPending: a.electricityPending || r.electricityPending,
+  }), { nights: 0, rent: 0, sub: 0, kwh: 0, elec: 0, total: 0, electricityPending: false });
 }
 
 function tableHTML(rows, showSub, withTotal) {
@@ -290,14 +292,14 @@ function tableHTML(rows, showSub, withTotal) {
     <td>${fmtDate(r.from)} → ${fmtDate(r.to)}</td>
     <td class="num">${r.nights}${r.full ? '' : ' / ' + r.daysInMonth}</td>
     <td class="num">${eur(r.rent)}</td>
-    <td class="num">${eur(r.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(r.kwh)}</span></td>
+    <td class="num">${r.electricityPending ? 'À calculer à la sortie' : `${eur(r.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(r.kwh)}</span>`}</td>
     ${showSub ? `<td class="num">${eur(r.sub)}</td>` : ''}
     <td class="num"><b>${eur(r.total)}</b></td></tr>`).join('');
   let foot = '';
   if (withTotal) {
     const t = sumRows(rows);
     foot = `<tfoot><tr><td colspan="2">Total séjour</td><td class="num">${t.nights}</td><td class="num">${eur(t.rent)}</td>
-      <td class="num">${eur(t.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(t.kwh)}</span></td>
+      <td class="num">${t.electricityPending ? 'À calculer à la sortie' : `${eur(t.elec)}<br><span style="font-size:0.7rem;color:#64748b">${kwh(t.kwh)}</span>`}</td>
       ${showSub ? `<td class="num">${eur(t.sub)}</td>` : ''}<td class="num">${eur(t.total)}</td></tr></tfoot>`;
   }
   return `<table class="sr-table"><thead>${head}</thead><tbody>${body}</tbody>${foot}</table>`;
@@ -307,6 +309,8 @@ function quittanceHTML(rows, ctx, number) {
   const t = sumRows(rows);
   const from = rows[0].from, to = rows[rows.length - 1].to;
   const title = rows.length === 1 ? 'Période de ' + rows[0].label : 'Séjour du ' + fmtDate(from) + ' au ' + fmtDate(to);
+  const entryIndex = Number.isFinite(ctx.idxIn) ? ctx.idxIn.toLocaleString('fr-FR') : '';
+  const exitIndex = Number.isFinite(ctx.idxOut) ? ctx.idxOut.toLocaleString('fr-FR') : '';
   return `<article class="sr-doc">
     <h2>Quittance de loyer</h2>
     <div class="sr-doc-sub">N° ${number} · ${title}</div>
@@ -318,15 +322,17 @@ function quittanceHTML(rows, ctx, number) {
     <p style="margin-top:0.9rem">
       Je soussigné(e) <b>${esc(ctx.landlord || '…………………')}</b>, bailleur du logement désigné ci-dessus,
       déclare avoir reçu de <b>${esc(ctx.tenant || '…………………')}</b> la somme de <b>${eur(t.total)}</b>
-      (<i>${amountWords(t.total)}</i>), au titre du loyer et des charges d'électricité pour la période
+      (<i>${amountWords(t.total)}</i>), au titre du loyer${ctx.sub > 0 ? ' et de l’abonnement électrique' : ''} pour la période
       du <b>${fmtDate(from)}</b> au <b>${fmtDate(to)}</b>, et lui en donne quittance, sous réserve de tous mes droits.
     </p>
     <div class="sr-table-wrap">${tableHTML(rows, ctx.sub > 0, rows.length > 1)}</div>
     <p style="font-size:0.78rem;color:#475569">
-      Électricité : index d'entrée ${ctx.idxIn.toLocaleString('fr-FR')} kWh → index de sortie ${ctx.idxOut.toLocaleString('fr-FR')} kWh,
-      soit ${kwh(ctx.kwhTotal)} au prix de ${ctx.price.toLocaleString('fr-FR', { maximumFractionDigits: 4 })} € TTC/kWh,
-      répartis au prorata des nuits.${rows.some(r => !r.full) ? ' Loyer mensuel de ' + eur(ctx.rent) + ' calculé au prorata des nuits pour les mois incomplets.' : ''}
+      Index compteur à l'entrée : ${entryIndex} kWh · Index compteur à la sortie : ${exitIndex} kWh
     </p>
+    ${ctx.electricityPending
+      ? '<p style="font-size:0.78rem;color:#475569">La consommation électrique sera calculée à la sortie du logement, après relevé de l’index final du compteur. Elle n’est pas incluse dans le montant de la présente quittance.</p>'
+      : `<p style="font-size:0.78rem;color:#475569">Consommation électrique : ${kwh(ctx.kwhTotal)} au prix de ${ctx.price.toLocaleString('fr-FR', { maximumFractionDigits: 4 })} € TTC/kWh, répartis au prorata des nuits.</p>`}
+    ${rows.some(r => !r.full) ? '<p style="font-size:0.78rem;color:#475569">Loyer mensuel de ' + eur(ctx.rent) + ' calculé au prorata des nuits pour les mois incomplets.</p>' : ''}
     <p class="sr-doc-total" style="margin-top:0.75rem">Total payé : ${eur(t.total)}</p>
     <div class="sr-doc-sign">
       <div>Fait à Saint-Vallier-de-Thiey, le ${ctx.paid ? fmtDate(ctx.paid) : '……………'}</div>
@@ -361,8 +367,10 @@ function render() {
 
   const idxIn = num('sr-idx-in'), idxOut = num('sr-idx-out');
   const price = num('sr-kwh-price') || 0, rent = num('sr-rent') || 0, sub = num('sr-sub') || 0;
+  const hasEntryIndex = !isNaN(idxIn), hasExitIndex = !isNaN(idxOut);
+  const electricityPending = !hasEntryIndex || !hasExitIndex;
   let kwhTotal = 0;
-  if (!isNaN(idxIn) && !isNaN(idxOut)) {
+  if (hasEntryIndex && hasExitIndex) {
     if (idxOut < idxIn) {
       elecHint.className = 'sr-hint err'; elecHint.textContent = 'L\'index de sortie doit être supérieur ou égal à l\'index d\'entrée.';
       summary.innerHTML = '';
@@ -372,16 +380,21 @@ function render() {
     elecHint.className = 'sr-hint ok';
     elecHint.textContent = `Consommation : ${kwh(kwhTotal)} × ${price.toLocaleString('fr-FR', { maximumFractionDigits: 4 })} € = ${eur(round2(kwhTotal * price))}`;
   } else {
-    elecHint.className = 'sr-hint'; elecHint.textContent = 'Saisissez les deux index pour calculer l\'électricité.';
+    elecHint.className = 'sr-hint';
+    elecHint.textContent = hasEntryIndex
+      ? 'La consommation électrique sera calculée à la sortie, après saisie de l’index final.'
+      : hasExitIndex
+        ? 'Saisissez également l’index d’entrée pour calculer l’électricité.'
+        : 'Les index sont facultatifs. L’électricité sera calculée à la sortie lorsque les deux relevés seront disponibles.';
   }
 
-  const elecTotal = round2(kwhTotal * price);
-  const rows = computeMonths(start, end, rent, elecTotal, kwhTotal, sub);
+  const elecTotal = electricityPending ? 0 : round2(kwhTotal * price);
+  const rows = computeMonths(start, end, rent, elecTotal, kwhTotal, sub, electricityPending);
   summary.innerHTML = tableHTML(rows, sub > 0, true);
 
   const ctx = {
     landlord: $('sr-landlord').value.trim(), tenant: $('sr-tenant').value.trim(), address: $('sr-address').value.trim(),
-    paid: parseDate($('sr-paid').value), idxIn: idxIn || 0, idxOut: idxOut || 0, kwhTotal, price, rent, sub,
+    paid: parseDate($('sr-paid').value), idxIn, idxOut, kwhTotal, price, rent, sub, electricityPending,
   };
   const base = $('sr-start').value.replace(/-/g, '');
   docs.innerHTML = mode === 'single'
@@ -403,6 +416,7 @@ function load() {
     const data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (!data) return;
     if (data['sr-kwh-price'] === '0.20' || data['sr-kwh-price'] === '0.228') data['sr-kwh-price'] = '0.277';
+    if (Number(data['sr-idx-in']) > 0 && data['sr-idx-out'] === '0') data['sr-idx-out'] = '';
     FIELDS.forEach(id => { if (data[id] != null && data[id] !== '') $(id).value = data[id]; });
     if (data.mode) mode = data.mode;
   } catch (e) {}
